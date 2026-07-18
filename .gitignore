@@ -36,3 +36,7 @@ Thumbs.db
 .vscode/
 playwright-report/
 test-results/
+
+# Catalyst local state and container archives
+.catalystrc
+*.tar
