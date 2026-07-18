@@ -1,0 +1,13 @@
+[
+  {
+    "external_id": "SYN-IMPORT-SAMPLE-JSON-001",
+    "fir_number": "SYN-FIR-SAMPLE-JSON-001",
+    "crime_number": "SYN-CRIME-SAMPLE-JSON-001",
+    "station_id": "SYN-STN-01",
+    "district_id": "SYN-DST-01",
+    "offence": "CHAIN_SNATCHING",
+    "incident_at": "2026-07-01T10:00:00+00:00",
+    "registered_at": "2026-07-01T12:00:00+00:00",
+    "status": "UNRESOLVED"
+  }
+]

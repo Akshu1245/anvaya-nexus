@@ -1,0 +1,2 @@
+external_id,fir_number,crime_number,station_id,district_id,offence,incident_at,registered_at,status
+SYN-IMPORT-SAMPLE-001,SYN-FIR-SAMPLE-001,SYN-CRIME-SAMPLE-001,SYN-STN-01,SYN-DST-01,CHAIN_SNATCHING,2026-07-01T10:00:00+00:00,2026-07-01T12:00:00+00:00,UNRESOLVED
