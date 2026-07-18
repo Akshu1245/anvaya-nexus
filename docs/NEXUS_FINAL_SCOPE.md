@@ -12,7 +12,7 @@ ANVAYA NEXUS is a synthetic-only, explainable FIR intelligence prototype. It is 
 
 ## Dataset boundaries
 
-The included fixture is synthetic and models CaseMaster, person roles, legal acts/sections, units, officers, courts, arrest/surrender events, chargesheets and source provenance. It deliberately excludes protected attributes from intelligence behavior, including caste, religion, disability, blood group and HR data.
+The included fixture contains 24 deliberately selected synthetic benchmark cases and models CaseMaster, person roles, legal acts/sections, units, officers, courts, arrest/surrender events, chargesheets and source provenance. It deliberately excludes protected attributes from intelligence behavior, including caste, religion, disability, blood group and HR data. See [research-led benchmark rationale](RESEARCH_LED_BENCHMARK.md).
 
 ## Non-goals
 

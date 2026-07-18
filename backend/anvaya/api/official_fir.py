@@ -35,7 +35,9 @@ def cases_search():
         current_app.extensions["repository"], crime_no=request.args.get("crime_no"),
         case_no=request.args.get("case_no"), person_name=request.args.get("person_name"), role=role,
         act=request.args.get("act"), section=request.args.get("section"), unit_id=request.args.get("unit_id"),
-        court_id=request.args.get("court_id"), status=request.args.get("status"), limit=limit, offset=offset,
+        court_id=request.args.get("court_id"), status=request.args.get("status"), category=request.args.get("category"),
+        gravity=request.args.get("gravity"), major_head=request.args.get("major_head"),
+        minor_head=request.args.get("minor_head"), q=request.args.get("q"), limit=limit, offset=offset,
     )
     audit(current_app.extensions["repository"], "OFFICIAL_FIR_SEARCH", "SUCCESS", g.user["id"], g.request_id,
           {"result_count": len(results), "synthetic_only": True})

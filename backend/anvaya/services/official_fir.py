@@ -38,129 +38,126 @@ def _source_record(conn, external_id: str, payload: dict, timestamp: str) -> str
 
 
 def seed_official_fir_fixture(repository) -> dict:
-    """Seed a small, synthetic fixture shaped like the official FIR ER model.
+    """Seed a curated, synthetic FIR retrieval benchmark.
 
-    This deliberately uses no real police or citizen data. It is idempotent and coexists
-    with the older M2 synthetic fixture while the frontend is migrated incrementally.
+    Each fixture represents a legitimate record-retrieval or record-assurance workflow.
+    Names, stations, locations and facts are fictional; neither the fixture nor its
+    legal labels are suitable for operational or legal decisions.
     """
     conn = repository.connection
     now = datetime(2026, 7, 18, 9, 0, tzinfo=timezone.utc)
     ts = now.isoformat()
-
     units = [
         ("FIR-UNIT-001", "04430006", "Synthetic Central Police Station", "POLICE_STATION", "SYN-DST-01", "KA"),
         ("FIR-UNIT-002", "04430007", "Synthetic North Police Station", "POLICE_STATION", "SYN-DST-01", "KA"),
+        ("FIR-UNIT-003", "04430008", "Synthetic East Police Station", "POLICE_STATION", "SYN-DST-02", "KA"),
     ]
-    for row in units:
-        payload = {"UnitID": row[0], "UnitCode": row[1], "UnitName": row[2]}
-        sr = _source_record(conn, row[0], payload, ts)
-        conn.execute("INSERT OR IGNORE INTO police_units VALUES (?,?,?,?,?,?,?,?)", (*row, 1, sr))
-
     officers = [
         ("FIR-OFF-001", "EMP-1001", "Synthetic Officer One", "INSPECTOR", "SHO", "FIR-UNIT-001"),
         ("FIR-OFF-002", "EMP-1002", "Synthetic Officer Two", "SUB_INSPECTOR", "IO", "FIR-UNIT-002"),
+        ("FIR-OFF-003", "EMP-1003", "Synthetic Officer Three", "INSPECTOR", "IO", "FIR-UNIT-003"),
     ]
+    courts = [("FIR-COURT-001", "COURT-01", "Synthetic District Court", "SYN-DST-01"),
+              ("FIR-COURT-002", "COURT-02", "Synthetic Sessions Court", "SYN-DST-02")]
+    acts = [("FIR-ACT-BNS", "BNS", "Synthetic BNS reference - not legal advice", "BNS"),
+            ("FIR-ACT-IT", "IT_ACT", "Synthetic information-technology reference - not legal advice", "IT Act"),
+            ("FIR-ACT-REPORT", "SPECIAL_REPORT", "Synthetic report category reference", "Special report")]
+    sections = [
+        ("FIR-SEC-303", "FIR-ACT-BNS", "303", "Synthetic theft-retrieval fixture"),
+        ("FIR-SEC-309", "FIR-ACT-BNS", "309", "Synthetic robbery-retrieval fixture"),
+        ("FIR-SEC-318", "FIR-ACT-BNS", "318", "Synthetic deception-retrieval fixture"),
+        ("FIR-SEC-324", "FIR-ACT-BNS", "324", "Synthetic property-damage retrieval fixture"),
+        ("FIR-SEC-356", "FIR-ACT-BNS", "356", "Synthetic intimidation-retrieval fixture"),
+        ("FIR-SEC-66C", "FIR-ACT-IT", "66C", "Synthetic digital-identity retrieval fixture"),
+        ("FIR-SEC-66D", "FIR-ACT-IT", "66D", "Synthetic digital-deception retrieval fixture"),
+        ("FIR-SEC-UDR", "FIR-ACT-REPORT", "SYN-UDR", "Synthetic UDR retrieval fixture"),
+        ("FIR-SEC-ZERO", "FIR-ACT-REPORT", "SYN-ZERO", "Synthetic Zero FIR transfer fixture"),
+        ("FIR-SEC-PAR", "FIR-ACT-REPORT", "SYN-PAR", "Synthetic petition/report fixture"),
+        ("FIR-SEC-MISSING", "FIR-ACT-REPORT", "SYN-MISSING", "Synthetic missing-person retrieval fixture"),
+    ]
+    act_ids = {row[1]: row[0] for row in acts}
+    section_ids = {(act_code, code): section_id for section_id, act_id, code, _ in sections
+                   for act_code, mapped_id in act_ids.items() if mapped_id == act_id}
+    for row in units:
+        sr = _source_record(conn, row[0], {"UnitID": row[0], "UnitCode": row[1], "UnitName": row[2]}, ts)
+        conn.execute("INSERT OR IGNORE INTO police_units VALUES (?,?,?,?,?,?,?,?)", (*row, 1, sr))
     for row in officers:
         sr = _source_record(conn, row[0], {"EmployeeID": row[0], "EmployeeCode": row[1]}, ts)
         conn.execute("INSERT OR IGNORE INTO police_employees VALUES (?,?,?,?,?,?,?,?)", (*row, 1, sr))
-
-    courts = [
-        ("FIR-COURT-001", "COURT-01", "Synthetic District Court", "SYN-DST-01"),
-    ]
     for row in courts:
         sr = _source_record(conn, row[0], {"CourtID": row[0], "CourtCode": row[1]}, ts)
         conn.execute("INSERT OR IGNORE INTO courts VALUES (?,?,?,?,?,?)", (*row, 1, sr))
-
-    acts = [
-        ("FIR-ACT-BNS", "BNS", "Bharatiya Nyaya Sanhita synthetic reference", "BNS"),
-    ]
     for row in acts:
         sr = _source_record(conn, row[0], {"ActCode": row[1], "Description": row[2]}, ts)
         conn.execute("INSERT OR IGNORE INTO legal_acts VALUES (?,?,?,?,?,?)", (*row, 1, sr))
-
-    sections = [
-        ("FIR-SEC-303", "FIR-ACT-BNS", "303", "Synthetic theft section fixture"),
-        ("FIR-SEC-309", "FIR-ACT-BNS", "309", "Synthetic robbery section fixture"),
-    ]
     for row in sections:
-        sr = _source_record(conn, row[0], {"ActCode": "BNS", "SectionCode": row[2]}, ts)
+        act_code = next(code for code, act_id in act_ids.items() if act_id == row[1])
+        sr = _source_record(conn, row[0], {"ActCode": act_code, "SectionCode": row[2]}, ts)
         conn.execute("INSERT OR IGNORE INTO legal_sections VALUES (?,?,?,?,?,?)", (*row, 1, sr))
 
+    def case(case_id, crime, offence, status, category, gravity, major, minor, days_ago, station, officer,
+             court, act, section, people, facts, *, arrest=None, chargesheet=False):
+        incident = now - timedelta(days=days_ago)
+        return {"id": case_id, "fir": crime[-9:], "crime": crime, "offence": offence, "status": status,
+                "category": category, "gravity": gravity, "major": major, "minor": minor,
+                "incident": incident, "registered": incident + timedelta(hours=2), "station": station,
+                "officer": officer, "court": court, "act": act, "section": section, "people": people,
+                "facts": facts, "lat": 15.10 + (days_ago % 8) / 100, "lon": 75.60 + (days_ago % 8) / 100,
+                "arrest": arrest, "chargesheet": chargesheet}
+
     cases = [
-        {
-            "id": "FIR-CASE-0001", "fir": "104430006202600001", "crime": "104430006202600001",
-            "station": "FIR-UNIT-001", "district": "SYN-DST-01", "offence": "THEFT",
-            "incident": now - timedelta(days=10), "registered": now - timedelta(days=9, hours=20),
-            "category": "FIR", "gravity": "NON_HEINOUS", "major": "PROPERTY_OFFENCE", "minor": "THEFT",
-            "court": "FIR-COURT-001", "officer": "FIR-OFF-001", "lat": 15.142, "lon": 75.621,
-            "facts": "Synthetic complaint regarding theft of property from a locked premises."
-        },
-        {
-            "id": "FIR-CASE-0002", "fir": "104430007202600002", "crime": "104430007202600002",
-            "station": "FIR-UNIT-002", "district": "SYN-DST-01", "offence": "ROBBERY",
-            "incident": now - timedelta(days=6), "registered": now - timedelta(days=5, hours=22),
-            "category": "FIR", "gravity": "HEINOUS", "major": "PROPERTY_OFFENCE", "minor": "ROBBERY",
-            "court": "FIR-COURT-001", "officer": "FIR-OFF-002", "lat": 15.151, "lon": 75.632,
-            "facts": "Synthetic complaint regarding robbery. One possible shared accused requires human verification."
-        },
+        case("FIR-CASE-0001", "104430006202600001", "THEFT", "UNRESOLVED", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "THEFT", 10, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "303", [("COMPLAINANT", "Synthetic Complainant One"), ("VICTIM", "Synthetic Victim One"), ("ACCUSED", "Synthetic Accused Alpha")], "Locked-premises property theft benchmark; status-to-chargesheet assurance review.", chargesheet=True),
+        case("FIR-CASE-0002", "104430007202600002", "ROBBERY", "CHARGESHEETED", "FIR", "HEINOUS", "PROPERTY_OFFENCE", "ROBBERY", 6, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "BNS", "309", [("ACCUSED", "Synthetic Accused Alpha"), ("COMPLAINANT", "Synthetic Accused Beta")], "Robbery benchmark with a factual shared-person record and arrest event.", arrest=("ARREST", "Synthetic Accused Alpha"), chargesheet=True),
+        case("FIR-CASE-0003", "104430006202600003", "MISSING_PERSON_REPORT", "UNDER_INVESTIGATION", "FIR", "SENSITIVE", "PERSON_SAFETY", "MISSING_PERSON", 18, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-MISSING", [("COMPLAINANT", "Synthetic Reporter Mira"), ("VICTIM", "Synthetic Missing Person One")], "Missing-person report benchmark: retrieve by reporter, status, and category."),
+        case("FIR-CASE-0004", "804430007202600004", "ZERO_FIR_TRANSFER", "TRANSFERRED", "ZERO_FIR", "NON_HEINOUS", "JURISDICTION", "ZERO_FIR", 20, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-ZERO", [("COMPLAINANT", "Synthetic Reporter Mira"), ("VICTIM", "Synthetic Victim Transfer")], "Zero FIR transfer benchmark: show source station and transfer status without altering jurisdiction."),
+        case("FIR-CASE-0005", "104430006202600005", "CYBER_FINANCIAL_FRAUD", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "CYBER_CRIME", "DIGITAL_DECEPTION", 15, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "IT_ACT", "66D", [("COMPLAINANT", "Synthetic Reporter Kavya"), ("VICTIM", "Synthetic Account Holder One")], "Digital-deception benchmark: retrieve by Act, section, reporter, and offence family."),
+        case("FIR-CASE-0006", "104430007202600006", "DIGITAL_IDENTITY_MISUSE", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "CYBER_CRIME", "IDENTITY_MISUSE", 14, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "IT_ACT", "66C", [("COMPLAINANT", "Synthetic Reporter Kavya"), ("VICTIM", "Synthetic Account Holder Two")], "Digital identity-misuse benchmark sharing an explicitly stored reporter record, requiring human review."),
+        case("FIR-CASE-0007", "104430006202600007", "CHAIN_SNATCHING", "UNDER_INVESTIGATION", "FIR", "SERIOUS", "PROPERTY_OFFENCE", "SNATCHING", 25, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "309", [("VICTIM", "Synthetic Victim Chain One"), ("ACCUSED", "Synthetic Accused Gamma")], "Street-property offence benchmark with an arrest record.", arrest=("ARREST", "Synthetic Accused Gamma")),
+        case("FIR-CASE-0008", "104430007202600008", "HOUSEBREAKING", "CHARGESHEETED", "FIR", "SERIOUS", "PROPERTY_OFFENCE", "HOUSEBREAKING", 32, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "BNS", "303", [("COMPLAINANT", "Synthetic Householder One"), ("ACCUSED", "Synthetic Accused Gamma")], "Housebreaking benchmark: find prior factual appearance of an explicitly shared synthetic person.", chargesheet=True),
+        case("FIR-CASE-0009", "304430006202600009", "ROAD_TRAFFIC_UDR", "CLOSED", "UDR", "NON_HEINOUS", "UNNATURAL_DEATH_REPORT", "ROAD_TRAFFIC", 40, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-UDR", [("COMPLAINANT", "Synthetic Reporter Road One"), ("VICTIM", "Synthetic Road Victim One")], "UDR benchmark: retrieve non-FIR report category separately from offences."),
+        case("FIR-CASE-0010", "304430007202600010", "UNNATURAL_DEATH_REPORT", "UNDER_REVIEW", "UDR", "SENSITIVE", "UNNATURAL_DEATH_REPORT", "UNNATURAL_DEATH", 39, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-UDR", [("COMPLAINANT", "Synthetic Reporter Road One"), ("VICTIM", "Synthetic UDR Subject One")], "UDR review benchmark sharing only a factual reporter record; no inference is made."),
+        case("FIR-CASE-0011", "104430006202600011", "ASSAULT_COMPLAINT", "UNDER_INVESTIGATION", "FIR", "SERIOUS", "PERSON_OFFENCE", "ASSAULT", 22, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "318", [("COMPLAINANT", "Synthetic Reporter Nila"), ("VICTIM", "Synthetic Victim Safety One")], "Person-offence benchmark focused on status and source-cited record verification."),
+        case("FIR-CASE-0012", "104430007202600012", "ONLINE_IMPERSONATION", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "CYBER_CRIME", "IMPERSONATION", 17, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "IT_ACT", "66C", [("COMPLAINANT", "Synthetic Reporter Nila"), ("VICTIM", "Synthetic Digital Victim One")], "Online impersonation benchmark: retrieve by person, IT Act section, and investigation status."),
+        case("FIR-CASE-0013", "104430006202600013", "EXTORTION_COMPLAINT", "UNDER_INVESTIGATION", "FIR", "SERIOUS", "PROPERTY_OFFENCE", "EXTORTION", 27, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "356", [("COMPLAINANT", "Synthetic Business Owner One"), ("ACCUSED", "Synthetic Accused Delta")], "Extortion complaint benchmark: retrieve a person role alongside a legal section."),
+        case("FIR-CASE-0014", "104430007202600014", "VEHICLE_THEFT", "PROPERTY_RECOVERED", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "VEHICLE_THEFT", 28, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "BNS", "303", [("COMPLAINANT", "Synthetic Vehicle Owner One"), ("ACCUSED", "Synthetic Accused Delta")], "Vehicle-theft benchmark with a factual shared accused record and property-recovery status.", arrest=("SURRENDER", "Synthetic Accused Delta")),
+        case("FIR-CASE-0015", "104430006202600015", "PROPERTY_DAMAGE", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "DAMAGE", 12, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "324", [("COMPLAINANT", "Synthetic Property Manager One"), ("VICTIM", "Synthetic Property Owner One")], "Property-damage benchmark: keyword, station, and status retrieval."),
+        case("FIR-CASE-0016", "304430007202600016", "UNIDENTIFIED_PROPERTY_UDR", "CLOSED", "UDR", "NON_HEINOUS", "PROPERTY_REPORT", "UNIDENTIFIED_PROPERTY", 45, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-UDR", [("COMPLAINANT", "Synthetic Finder One")], "Unidentified-property report benchmark; no identity or ownership conclusion is generated."),
+        case("FIR-CASE-0017", "104430006202600017", "CHEATING_COMPLAINT", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "DECEPTION", 30, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "318", [("COMPLAINANT", "Synthetic Trader One"), ("ACCUSED", "Synthetic Accused Epsilon")], "Deception complaint benchmark for Act-and-section search."),
+        case("FIR-CASE-0018", "104430007202600018", "ROBBERY", "CHARGESHEETED", "FIR", "HEINOUS", "PROPERTY_OFFENCE", "ROBBERY", 55, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "BNS", "309", [("COMPLAINANT", "Synthetic Reporter Robbery Two"), ("ACCUSED", "Synthetic Accused Epsilon")], "Second robbery benchmark enabling evidence-led retrieval of a stored repeat person record.", chargesheet=True),
+        case("FIR-CASE-0019", "104430006202600019", "MISSING_PROPERTY", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "MISSING_PROPERTY", 16, "FIR-UNIT-001", "FIR-OFF-001", "FIR-COURT-001", "BNS", "303", [("COMPLAINANT", "Synthetic Student One"), ("VICTIM", "Synthetic Student One")], "Missing-property benchmark with the same recorded person in two roles in one case."),
+        case("FIR-CASE-0020", "404430007202600020", "PETITION_ENQUIRY_REPORT", "REFERRED", "PAR", "NON_HEINOUS", "ADMINISTRATIVE_REPORT", "PETITION", 8, "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", "SPECIAL_REPORT", "SYN-PAR", [("COMPLAINANT", "Synthetic Petitioner One")], "Petition/enquiry report benchmark: category-first filtering without treating it as an FIR."),
+        case("FIR-CASE-0021", "104430008202600021", "CYBER_FINANCIAL_FRAUD", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "CYBER_CRIME", "DIGITAL_DECEPTION", 11, "FIR-UNIT-003", "FIR-OFF-003", "FIR-COURT-002", "IT_ACT", "66D", [("COMPLAINANT", "Synthetic Reporter Kavya"), ("VICTIM", "Synthetic Account Holder Three")], "Cross-station cyber-fraud benchmark: retrieve all records for a reporter without asserting a relationship."),
+        case("FIR-CASE-0022", "304430008202600022", "UNNATURAL_DEATH_REPORT", "CLOSED", "UDR", "SENSITIVE", "UNNATURAL_DEATH_REPORT", "UNNATURAL_DEATH", 62, "FIR-UNIT-003", "FIR-OFF-003", "FIR-COURT-002", "SPECIAL_REPORT", "SYN-UDR", [("COMPLAINANT", "Synthetic Reporter UDR Two"), ("VICTIM", "Synthetic UDR Subject Two")], "Closed UDR benchmark: status and category retrieval for record review."),
+        case("FIR-CASE-0023", "104430008202600023", "PROPERTY_DAMAGE", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "PROPERTY_OFFENCE", "DAMAGE", 7, "FIR-UNIT-003", "FIR-OFF-003", "FIR-COURT-002", "BNS", "324", [("COMPLAINANT", "Synthetic Property Manager One"), ("ACCUSED", "Synthetic Accused Zeta")], "Cross-station property-damage benchmark sharing a factual complainant record."),
+        case("FIR-CASE-0024", "104430008202600024", "DIGITAL_IDENTITY_MISUSE", "UNDER_INVESTIGATION", "FIR", "NON_HEINOUS", "CYBER_CRIME", "IDENTITY_MISUSE", 5, "FIR-UNIT-003", "FIR-OFF-003", "FIR-COURT-002", "IT_ACT", "66C", [("COMPLAINANT", "Synthetic Reporter Digital Two"), ("VICTIM", "Synthetic Digital Victim Two")], "Digital identity-misuse benchmark for full-text and section retrieval."),
     ]
+    person_ids: dict[str, str] = {}
+    role_rows: list[tuple[str, str, str, str, int]] = []
     for item in cases:
-        sr = _source_record(conn, item["id"], {"CaseMasterID": item["id"], "CrimeNo": item["crime"]}, ts)
-        conn.execute(
-            "INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (item["id"], item["fir"], item["crime"], item["station"], item["district"], item["offence"],
-             item["incident"].isoformat(), item["registered"].isoformat(), "UNRESOLVED", sr),
-        )
-        conn.execute(
-            """INSERT OR IGNORE INTO fir_case_details
-            (case_id,case_category_code,gravity_code,crime_major_head,crime_minor_head,court_id,
-             registering_officer_id,incident_from_at,incident_to_at,information_received_at,latitude,
-             longitude,brief_facts,source_record_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (item["id"], item["category"], item["gravity"], item["major"], item["minor"], item["court"],
-             item["officer"], item["incident"].isoformat(), (item["incident"] + timedelta(hours=1)).isoformat(),
-             (item["incident"] + timedelta(hours=2)).isoformat(), item["lat"], item["lon"], item["facts"], sr),
-        )
-
-    persons = [
-        ("FIR-PER-001", "Synthetic Complainant One", 1988, "Synthetic Address A"),
-        ("FIR-PER-002", "Synthetic Victim One", 1994, "Synthetic Address B"),
-        ("FIR-PER-003", "Synthetic Accused Alpha", 1991, "Synthetic Address C"),
-        ("FIR-PER-004", "Synthetic Accused Beta", 1990, "Synthetic Address D"),
-    ]
-    for row in persons:
-        sr = _source_record(conn, row[0], {"PersonID": row[0], "Name": row[1]}, ts)
-        conn.execute("INSERT OR IGNORE INTO persons VALUES (?,?,?,?,?,?)", (*row, "SYNTHETIC_OFFICIAL_FIXTURE", sr))
-
-    roles = [
-        ("FIR-ROLE-001", "FIR-CASE-0001", "FIR-PER-001", "COMPLAINANT", 1),
-        ("FIR-ROLE-002", "FIR-CASE-0001", "FIR-PER-002", "VICTIM", 1),
-        ("FIR-ROLE-003", "FIR-CASE-0001", "FIR-PER-003", "ACCUSED", 1),
-        ("FIR-ROLE-004", "FIR-CASE-0002", "FIR-PER-003", "ACCUSED", 1),
-        ("FIR-ROLE-005", "FIR-CASE-0002", "FIR-PER-004", "COMPLAINANT", 1),
-    ]
-    for row in roles:
+        sr = _source_record(conn, item["id"], {"CaseMasterID": item["id"], "CrimeNo": item["crime"], "SyntheticBenchmark": True}, ts)
+        conn.execute("INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,?,?,?,?)", (item["id"], item["fir"], item["crime"], item["station"], "SYN-DST-01", item["offence"], item["incident"].isoformat(), item["registered"].isoformat(), item["status"], sr))
+        conn.execute("""INSERT OR IGNORE INTO fir_case_details (case_id,case_category_code,gravity_code,crime_major_head,crime_minor_head,court_id,registering_officer_id,incident_from_at,incident_to_at,information_received_at,latitude,longitude,brief_facts,source_record_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (item["id"], item["category"], item["gravity"], item["major"], item["minor"], item["court"], item["officer"], item["incident"].isoformat(), (item["incident"] + timedelta(hours=1)).isoformat(), (item["incident"] + timedelta(hours=2)).isoformat(), item["lat"], item["lon"], item["facts"], sr))
+        for order, (role, name) in enumerate(item["people"], start=1):
+            if name not in person_ids:
+                person_id = f"FIR-PER-{len(person_ids) + 1:03d}"
+                person_ids[name] = person_id
+                person_sr = _source_record(conn, person_id, {"PersonID": person_id, "Name": name, "SyntheticBenchmark": True}, ts)
+                conn.execute("INSERT OR IGNORE INTO persons VALUES (?,?,?,?,?,?)", (person_id, name, 1980 + len(person_ids) % 24, "Synthetic restricted address", "SYNTHETIC_OFFICIAL_FIXTURE", person_sr))
+            role_rows.append((f"FIR-ROLE-{len(role_rows) + 1:03d}", item["id"], person_ids[name], role, order))
+    for row in role_rows:
         sr = _source_record(conn, row[0], {"CaseMasterID": row[1], "PersonID": row[2], "Role": row[3]}, ts)
         conn.execute("INSERT OR IGNORE INTO case_person_roles VALUES (?,?,?,?,?,?)", (*row, sr))
-
-    legal_links = [
-        ("FIR-LAW-001", "FIR-CASE-0001", "FIR-ACT-BNS", "FIR-SEC-303", 1, 1),
-        ("FIR-LAW-002", "FIR-CASE-0002", "FIR-ACT-BNS", "FIR-SEC-309", 1, 1),
-    ]
-    for row in legal_links:
+    for index, item in enumerate(cases, start=1):
+        row = (f"FIR-LAW-{index:03d}", item["id"], act_ids[item["act"]], section_ids[(item["act"], item["section"])], 1, 1)
         sr = _source_record(conn, row[0], {"CaseMasterID": row[1], "SectionID": row[3]}, ts)
         conn.execute("INSERT OR IGNORE INTO case_legal_sections VALUES (?,?,?,?,?,?,?)", (*row, sr))
-
-    arrest_sr = _source_record(conn, "FIR-ARR-001", {"CaseMasterID": "FIR-CASE-0002", "AccusedMasterID": "FIR-PER-003"}, ts)
-    conn.execute(
-        "INSERT OR IGNORE INTO arrest_surrender_events VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-        ("FIR-ARR-001", "FIR-CASE-0002", "FIR-PER-003", "ARREST", (now - timedelta(days=4)).isoformat(),
-         "KA", "SYN-DST-01", "FIR-UNIT-002", "FIR-OFF-002", "FIR-COURT-001", arrest_sr),
-    )
-    cs_sr = _source_record(conn, "FIR-CS-001", {"CaseMasterID": "FIR-CASE-0001", "FinalReportType": "CHARGESHEET"}, ts)
-    conn.execute(
-        "INSERT OR IGNORE INTO chargesheets VALUES (?,?,?,?,?,?)",
-        ("FIR-CS-001", "FIR-CASE-0001", (now - timedelta(days=1)).isoformat(), "CHARGESHEET", "FILED", cs_sr),
-    )
+        if item["arrest"]:
+            event_type, person_name = item["arrest"]
+            event_id = f"FIR-ARR-{index:03d}"; arrest_sr = _source_record(conn, event_id, {"CaseMasterID": item["id"], "AccusedMasterID": person_ids[person_name]}, ts)
+            conn.execute("INSERT OR IGNORE INTO arrest_surrender_events VALUES (?,?,?,?,?,?,?,?,?,?,?)", (event_id, item["id"], person_ids[person_name], event_type, (item["registered"] + timedelta(days=1)).isoformat(), "KA", "SYN-DST-01", item["station"], item["officer"], item["court"], arrest_sr))
+        if item["chargesheet"]:
+            cs_id = f"FIR-CS-{index:03d}"; cs_sr = _source_record(conn, cs_id, {"CaseMasterID": item["id"], "FinalReportType": "CHARGESHEET"}, ts)
+            conn.execute("INSERT OR IGNORE INTO chargesheets VALUES (?,?,?,?,?,?)", (cs_id, item["id"], (item["registered"] + timedelta(days=3)).isoformat(), "CHARGESHEET", "FILED", cs_sr))
     conn.commit()
     return official_fir_counts(repository)
 
@@ -177,7 +174,10 @@ def search_official_cases(repository, *, crime_no: str | None = None, case_no: s
                           person_name: str | None = None, role: str | None = None,
                           act: str | None = None, section: str | None = None,
                           unit_id: str | None = None, court_id: str | None = None,
-                          status: str | None = None, limit: int = 25, offset: int = 0) -> list[dict]:
+                          status: str | None = None, category: str | None = None,
+                          gravity: str | None = None, major_head: str | None = None,
+                          minor_head: str | None = None, q: str | None = None,
+                          limit: int = 25, offset: int = 0) -> list[dict]:
     where = ["f.case_id IS NOT NULL"]
     args: list[object] = []
     if crime_no:
@@ -189,7 +189,15 @@ def search_official_cases(repository, *, crime_no: str | None = None, case_no: s
     if court_id:
         where.append("f.court_id=?"); args.append(court_id)
     if status:
-        where.append("c.status=?"); args.append(status)
+        where.append("UPPER(c.status) LIKE UPPER(?)"); args.append(f"%{status}%")
+    if category:
+        where.append("UPPER(f.case_category_code) LIKE UPPER(?)"); args.append(f"%{category}%")
+    if gravity:
+        where.append("UPPER(COALESCE(f.gravity_code,'')) LIKE UPPER(?)"); args.append(f"%{gravity}%")
+    if major_head:
+        where.append("UPPER(COALESCE(f.crime_major_head,'')) LIKE UPPER(?)"); args.append(f"%{major_head}%")
+    if minor_head:
+        where.append("UPPER(COALESCE(f.crime_minor_head,'')) LIKE UPPER(?)"); args.append(f"%{minor_head}%")
     if person_name:
         where.append("EXISTS (SELECT 1 FROM case_person_roles r JOIN persons p ON p.id=r.person_id WHERE r.case_id=c.id AND p.display_name LIKE ?" + (" AND r.role_type=?" if role else "") + ")")
         args.append(f"%{person_name}%")
@@ -202,10 +210,22 @@ def search_official_cases(repository, *, crime_no: str | None = None, case_no: s
     if section:
         where.append("EXISTS (SELECT 1 FROM case_legal_sections cl JOIN legal_sections s ON s.id=cl.section_id WHERE cl.case_id=c.id AND s.section_code LIKE ?)")
         args.append(f"%{section}%")
+    if q:
+        like = f"%{q}%"
+        where.append("""(c.crime_number LIKE ? OR c.fir_number LIKE ? OR c.offence LIKE ? OR c.status LIKE ?
+            OR f.case_category_code LIKE ? OR COALESCE(f.gravity_code,'') LIKE ?
+            OR COALESCE(f.crime_major_head,'') LIKE ? OR COALESCE(f.crime_minor_head,'') LIKE ?
+            OR COALESCE(f.brief_facts,'') LIKE ? OR EXISTS (SELECT 1 FROM police_units u WHERE u.id=c.station_id AND u.name LIKE ?)
+            OR EXISTS (SELECT 1 FROM courts ct WHERE ct.id=f.court_id AND ct.name LIKE ?)
+            OR EXISTS (SELECT 1 FROM case_person_roles r JOIN persons p ON p.id=r.person_id WHERE r.case_id=c.id AND p.display_name LIKE ?)
+            OR EXISTS (SELECT 1 FROM case_legal_sections cl JOIN legal_acts a ON a.id=cl.act_id JOIN legal_sections s ON s.id=cl.section_id WHERE cl.case_id=c.id AND (a.act_code LIKE ? OR a.short_name LIKE ? OR s.section_code LIKE ?)))""")
+        args.extend([like] * 15)
     sql = f"""SELECT c.id,c.fir_number,c.crime_number,c.station_id,c.district_id,c.offence,c.status,
                      c.incident_at,c.registered_at,f.case_category_code,f.gravity_code,f.crime_major_head,
-                     f.crime_minor_head,f.court_id,f.registering_officer_id
+                     f.crime_minor_head,f.court_id,f.registering_officer_id,u.name station_name,ct.name court_name,
+                     f.brief_facts
               FROM cases c JOIN fir_case_details f ON f.case_id=c.id
+              LEFT JOIN police_units u ON u.id=c.station_id LEFT JOIN courts ct ON ct.id=f.court_id
               WHERE {' AND '.join(where)} ORDER BY c.registered_at DESC,c.id LIMIT ? OFFSET ?"""
     args.extend((limit, offset))
     return [dict(row) for row in repository.connection.execute(sql, args)]
