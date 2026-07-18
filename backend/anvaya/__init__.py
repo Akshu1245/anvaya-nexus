@@ -22,7 +22,7 @@ from backend.anvaya.api.official_fir import official_fir_blueprint
 
 def create_app(config_name: str | None = None, config_override: dict | None = None) -> Flask:
     frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
-    app = Flask(__name__, static_folder=str(frontend_dist), static_url_path="/assets")
+    app = Flask(__name__, static_folder=str(frontend_dist / "assets"), static_url_path="/assets")
 
     selected: type[Config] = config_for(config_name)
     app.config.from_object(selected)
