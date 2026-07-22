@@ -58,5 +58,5 @@ def test_migrations_are_safe_on_repeated_startup(tmp_path):
     first = create_app("development", {"DATABASE_URL": database})
     first.extensions["repository"].close()
     second = create_app("development", {"DATABASE_URL": database})
-    assert second.extensions["repository"].connection.execute("SELECT MAX(version) FROM schema_versions").fetchone()[0] == 15
+    assert second.extensions["repository"].connection.execute("SELECT MAX(version) FROM schema_versions").fetchone()[0] == 16
     second.extensions["repository"].close()

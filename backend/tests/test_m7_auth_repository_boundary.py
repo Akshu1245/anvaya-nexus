@@ -92,7 +92,7 @@ def test_schema_health_uses_repository_contract_and_public_health_stays_unchange
     assert login.status_code == 200
     detailed = client.get("/api/system-health")
     assert detailed.status_code == 200
-    assert detailed.json["data"]["migration_version"] == 15
+    assert detailed.json["data"]["migration_version"] == 16
     assert called == {"schema": 1, "health": 2}
     safe = str(detailed.json).lower()
     assert "sqlite:///" not in safe and "password" not in safe and "credential" not in safe

@@ -17,6 +17,7 @@ from backend.anvaya.repositories.catalyst_readonly import CatalystReadOnlyReposi
 from backend.anvaya.services.source_registry import seed_source_registry
 from backend.anvaya.api.data_readiness import data_readiness_blueprint
 from backend.anvaya.api.m3 import m3_blueprint
+from backend.anvaya.api.official_fir import official_fir_blueprint
 from backend.anvaya.api.voice import voice_blueprint
 from backend.anvaya.services.auth import seed_users
 from backend.anvaya.services.generator import generate
@@ -96,6 +97,7 @@ def create_app(config_name: str | None = None, config_override: dict | None = No
     app.register_blueprint(health_blueprint)
     app.register_blueprint(data_readiness_blueprint)
     app.register_blueprint(m3_blueprint)
+    app.register_blueprint(official_fir_blueprint)
     app.register_blueprint(voice_blueprint)
 
     @app.get("/")

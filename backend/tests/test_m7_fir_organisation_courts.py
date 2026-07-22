@@ -17,7 +17,7 @@ def _seed(app):
 
 def test_organisation_schema_catalogues_and_hierarchy_constraints(app):
     repository = _seed(app)
-    assert repository.schema_version() == 15
+    assert repository.schema_version() == 16
     assert repository.table_count("states") == 2
     assert repository.table_count("districts") == 4
     assert repository.table_count("police_units") == 8

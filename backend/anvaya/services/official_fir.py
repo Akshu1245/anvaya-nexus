@@ -37,6 +37,63 @@ def _source_record(conn, external_id: str, payload: dict, timestamp: str) -> str
     return record_id
 
 
+_STATION_DISTRICT = {
+    "FIR-UNIT-001": "FIR-DIST-01",
+    "FIR-UNIT-002": "FIR-DIST-01",
+    "FIR-UNIT-003": "FIR-DIST-02",
+}
+
+
+def _seed_fir_organisation(conn, ts: str) -> dict:
+    state_id = "FIR-STATE-KA"
+    state_sr = _source_record(conn, state_id, {"StateCode": "KA"}, ts)
+    conn.execute(
+        "INSERT OR IGNORE INTO states VALUES (?,?,?,?,?)",
+        (state_id, "KA", "Synthetic Karnataka", 1, state_sr),
+    )
+    districts = {
+        "SYN-DST-01": ("FIR-DIST-01", "D01", "Synthetic District One"),
+        "SYN-DST-02": ("FIR-DIST-02", "D02", "Synthetic District Two"),
+    }
+    for district_key, (district_id, code, name) in districts.items():
+        district_sr = _source_record(conn, district_id, {"DistrictCode": code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO districts VALUES (?,?,?,?,?,?)",
+            (district_id, state_id, code, name, 1, district_sr),
+        )
+    unit_type_id = "FIR-UT-POLICE"
+    unit_type_sr = _source_record(conn, unit_type_id, {"UnitType": "POLICE_STATION"}, ts)
+    conn.execute(
+        "INSERT OR IGNORE INTO police_unit_types VALUES (?,?,?,?,?)",
+        (unit_type_id, "POLICE_STATION", "Police Station", 1, unit_type_sr),
+    )
+    rank_ids = {}
+    for rank_code in ("INSPECTOR", "SUB_INSPECTOR"):
+        rank_id = f"FIR-RANK-{rank_code.replace('_', '-')}"
+        rank_ids[rank_code] = rank_id
+        rank_sr = _source_record(conn, rank_id, {"RankCode": rank_code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO police_ranks VALUES (?,?,?,?,?)",
+            (rank_id, rank_code, f"Synthetic {rank_code}", 1, rank_sr),
+        )
+    designation_ids = {}
+    for designation_code in ("SHO", "IO"):
+        designation_id = f"FIR-DESG-{designation_code}"
+        designation_ids[designation_code] = designation_id
+        designation_sr = _source_record(conn, designation_id, {"Designation": designation_code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO police_designations VALUES (?,?,?,?,?)",
+            (designation_id, designation_code, f"Synthetic {designation_code}", 1, designation_sr),
+        )
+    return {
+        "state_id": state_id,
+        "districts": {key: value[0] for key, value in districts.items()},
+        "unit_type_id": unit_type_id,
+        "rank_ids": rank_ids,
+        "designation_ids": designation_ids,
+    }
+
+
 def seed_official_fir_fixture(repository) -> dict:
     """Seed a curated, synthetic FIR retrieval benchmark.
 
@@ -47,18 +104,21 @@ def seed_official_fir_fixture(repository) -> dict:
     conn = repository.connection
     now = datetime(2026, 7, 18, 9, 0, tzinfo=timezone.utc)
     ts = now.isoformat()
+    org = _seed_fir_organisation(conn, ts)
     units = [
-        ("FIR-UNIT-001", "04430006", "Synthetic Central Police Station", "POLICE_STATION", "SYN-DST-01", "KA"),
-        ("FIR-UNIT-002", "04430007", "Synthetic North Police Station", "POLICE_STATION", "SYN-DST-01", "KA"),
-        ("FIR-UNIT-003", "04430008", "Synthetic East Police Station", "POLICE_STATION", "SYN-DST-02", "KA"),
+        ("FIR-UNIT-001", "04430006", "Synthetic Central Police Station", "SYN-DST-01"),
+        ("FIR-UNIT-002", "04430007", "Synthetic North Police Station", "SYN-DST-01"),
+        ("FIR-UNIT-003", "04430008", "Synthetic East Police Station", "SYN-DST-02"),
     ]
     officers = [
         ("FIR-OFF-001", "EMP-1001", "Synthetic Officer One", "INSPECTOR", "SHO", "FIR-UNIT-001"),
         ("FIR-OFF-002", "EMP-1002", "Synthetic Officer Two", "SUB_INSPECTOR", "IO", "FIR-UNIT-002"),
         ("FIR-OFF-003", "EMP-1003", "Synthetic Officer Three", "INSPECTOR", "IO", "FIR-UNIT-003"),
     ]
-    courts = [("FIR-COURT-001", "COURT-01", "Synthetic District Court", "SYN-DST-01"),
-              ("FIR-COURT-002", "COURT-02", "Synthetic Sessions Court", "SYN-DST-02")]
+    courts = [
+        ("FIR-COURT-001", "COURT-01", "Synthetic District Court", "SYN-DST-01"),
+        ("FIR-COURT-002", "COURT-02", "Synthetic Sessions Court", "SYN-DST-02"),
+    ]
     acts = [("FIR-ACT-BNS", "BNS", "Synthetic BNS reference - not legal advice", "BNS"),
             ("FIR-ACT-IT", "IT_ACT", "Synthetic information-technology reference - not legal advice", "IT Act"),
             ("FIR-ACT-REPORT", "SPECIAL_REPORT", "Synthetic report category reference", "Special report")]
@@ -78,22 +138,48 @@ def seed_official_fir_fixture(repository) -> dict:
     act_ids = {row[1]: row[0] for row in acts}
     section_ids = {(act_code, code): section_id for section_id, act_id, code, _ in sections
                    for act_code, mapped_id in act_ids.items() if mapped_id == act_id}
-    for row in units:
-        sr = _source_record(conn, row[0], {"UnitID": row[0], "UnitCode": row[1], "UnitName": row[2]}, ts)
-        conn.execute("INSERT OR IGNORE INTO police_units VALUES (?,?,?,?,?,?,?,?)", (*row, 1, sr))
-    for row in officers:
-        sr = _source_record(conn, row[0], {"EmployeeID": row[0], "EmployeeCode": row[1]}, ts)
-        conn.execute("INSERT OR IGNORE INTO police_employees VALUES (?,?,?,?,?,?,?,?)", (*row, 1, sr))
-    for row in courts:
-        sr = _source_record(conn, row[0], {"CourtID": row[0], "CourtCode": row[1]}, ts)
-        conn.execute("INSERT OR IGNORE INTO courts VALUES (?,?,?,?,?,?)", (*row, 1, sr))
-    for row in acts:
-        sr = _source_record(conn, row[0], {"ActCode": row[1], "Description": row[2]}, ts)
-        conn.execute("INSERT OR IGNORE INTO legal_acts VALUES (?,?,?,?,?,?)", (*row, 1, sr))
-    for row in sections:
-        act_code = next(code for code, act_id in act_ids.items() if act_id == row[1])
-        sr = _source_record(conn, row[0], {"ActCode": act_code, "SectionCode": row[2]}, ts)
-        conn.execute("INSERT OR IGNORE INTO legal_sections VALUES (?,?,?,?,?,?)", (*row, 1, sr))
+    for unit_id, code, name, district_key in units:
+        district_id = org["districts"][district_key]
+        sr = _source_record(conn, unit_id, {"UnitID": unit_id, "UnitCode": code, "UnitName": name}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO police_units VALUES (?,?,?,?,?,?,?)",
+            (unit_id, district_id, org["unit_type_id"], code, name, 1, sr),
+        )
+    for officer_id, employee_code, display_name, rank_code, designation_code, unit_id in officers:
+        sr = _source_record(conn, officer_id, {"EmployeeID": officer_id, "EmployeeCode": employee_code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO police_employees VALUES (?,?,?,?,?,?,?,?)",
+            (
+                officer_id,
+                employee_code,
+                display_name,
+                org["rank_ids"][rank_code],
+                org["designation_ids"][designation_code],
+                unit_id,
+                1,
+                sr,
+            ),
+        )
+    for court_id, code, name, district_key in courts:
+        district_id = org["districts"][district_key]
+        sr = _source_record(conn, court_id, {"CourtID": court_id, "CourtCode": code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO courts VALUES (?,?,?,?,?,?)",
+            (court_id, district_id, code, name, 1, sr),
+        )
+    for act_id, act_code, description, short_name in acts:
+        sr = _source_record(conn, act_id, {"ActCode": act_code, "Description": description}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO legal_acts VALUES (?,?,?,?,?,?,?,?)",
+            (act_id, act_code, description, short_name, 1, sr, ts, ts),
+        )
+    for section_id, act_id, section_code, description in sections:
+        act_code = next(code for code, mapped_id in act_ids.items() if mapped_id == act_id)
+        sr = _source_record(conn, section_id, {"ActCode": act_code, "SectionCode": section_code}, ts)
+        conn.execute(
+            "INSERT OR IGNORE INTO legal_sections VALUES (?,?,?,?,?,?,?,?)",
+            (section_id, act_id, section_code, description, 1, sr, ts, ts),
+        )
 
     def case(case_id, crime, offence, status, category, gravity, major, minor, days_ago, station, officer,
              court, act, section, people, facts, *, arrest=None, chargesheet=False):
@@ -135,29 +221,145 @@ def seed_official_fir_fixture(repository) -> dict:
     role_rows: list[tuple[str, str, str, str, int]] = []
     for item in cases:
         sr = _source_record(conn, item["id"], {"CaseMasterID": item["id"], "CrimeNo": item["crime"], "SyntheticBenchmark": True}, ts)
-        conn.execute("INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,?,?,?,?)", (item["id"], item["fir"], item["crime"], item["station"], "SYN-DST-01", item["offence"], item["incident"].isoformat(), item["registered"].isoformat(), item["status"], sr))
-        conn.execute("""INSERT OR IGNORE INTO fir_case_details (case_id,case_category_code,gravity_code,crime_major_head,crime_minor_head,court_id,registering_officer_id,incident_from_at,incident_to_at,information_received_at,latitude,longitude,brief_facts,source_record_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (item["id"], item["category"], item["gravity"], item["major"], item["minor"], item["court"], item["officer"], item["incident"].isoformat(), (item["incident"] + timedelta(hours=1)).isoformat(), (item["incident"] + timedelta(hours=2)).isoformat(), item["lat"], item["lon"], item["facts"], sr))
+        district_id = _STATION_DISTRICT[item["station"]]
+        conn.execute(
+            """INSERT OR IGNORE INTO cases (
+                id,fir_number,crime_number,station_id,district_id,offence,incident_at,registered_at,status,source_record_id,
+                state_id,canonical_district_id,police_unit_id,registering_officer_id,court_id
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                item["id"],
+                item["fir"],
+                item["crime"],
+                item["station"],
+                district_id,
+                item["offence"],
+                item["incident"].isoformat(),
+                item["registered"].isoformat(),
+                item["status"],
+                sr,
+                org["state_id"],
+                district_id,
+                item["station"],
+                item["officer"],
+                item["court"],
+            ),
+        )
+        conn.execute(
+            """INSERT OR IGNORE INTO fir_case_details (
+                case_id,case_category_code,gravity_code,crime_major_head,crime_minor_head,court_id,registering_officer_id,
+                incident_from_at,incident_to_at,information_received_at,latitude,longitude,brief_facts,source_record_id
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                item["id"],
+                item["category"],
+                item["gravity"],
+                item["major"],
+                item["minor"],
+                item["court"],
+                item["officer"],
+                item["incident"].isoformat(),
+                (item["incident"] + timedelta(hours=1)).isoformat(),
+                (item["incident"] + timedelta(hours=2)).isoformat(),
+                item["lat"],
+                item["lon"],
+                item["facts"],
+                sr,
+            ),
+        )
         for order, (role, name) in enumerate(item["people"], start=1):
             if name not in person_ids:
                 person_id = f"FIR-PER-{len(person_ids) + 1:03d}"
                 person_ids[name] = person_id
                 person_sr = _source_record(conn, person_id, {"PersonID": person_id, "Name": name, "SyntheticBenchmark": True}, ts)
-                conn.execute("INSERT OR IGNORE INTO persons VALUES (?,?,?,?,?,?)", (person_id, name, 1980 + len(person_ids) % 24, "Synthetic restricted address", "SYNTHETIC_OFFICIAL_FIXTURE", person_sr))
+                birth_year = 1980 + len(person_ids) % 24
+                conn.execute(
+                    """INSERT OR IGNORE INTO persons (
+                        id,display_name,birth_year,address_text,identity_status,source_record_id,age_years,created_at,updated_at
+                    ) VALUES (?,?,?,?,?,?,?,?,?)""",
+                    (
+                        person_id,
+                        name,
+                        birth_year,
+                        "Synthetic restricted address",
+                        "SYNTHETIC_OFFICIAL_FIXTURE",
+                        person_sr,
+                        2026 - birth_year,
+                        ts,
+                        ts,
+                    ),
+                )
             role_rows.append((f"FIR-ROLE-{len(role_rows) + 1:03d}", item["id"], person_ids[name], role, order))
     for row in role_rows:
         sr = _source_record(conn, row[0], {"CaseMasterID": row[1], "PersonID": row[2], "Role": row[3]}, ts)
-        conn.execute("INSERT OR IGNORE INTO case_person_roles VALUES (?,?,?,?,?,?)", (*row, sr))
+        conn.execute(
+            "INSERT OR IGNORE INTO case_person_roles (id,case_id,person_id,role,role_sequence,source_record_id,created_at) VALUES (?,?,?,?,?,?,?)",
+            (*row, sr, ts),
+        )
     for index, item in enumerate(cases, start=1):
         row = (f"FIR-LAW-{index:03d}", item["id"], act_ids[item["act"]], section_ids[(item["act"], item["section"])], 1, 1)
         sr = _source_record(conn, row[0], {"CaseMasterID": row[1], "SectionID": row[3]}, ts)
-        conn.execute("INSERT OR IGNORE INTO case_legal_sections VALUES (?,?,?,?,?,?,?)", (*row, sr))
+        conn.execute(
+            "INSERT OR IGNORE INTO case_legal_sections VALUES (?,?,?,?,?,?,?,?)",
+            (*row, sr, ts),
+        )
         if item["arrest"]:
             event_type, person_name = item["arrest"]
-            event_id = f"FIR-ARR-{index:03d}"; arrest_sr = _source_record(conn, event_id, {"CaseMasterID": item["id"], "AccusedMasterID": person_ids[person_name]}, ts)
-            conn.execute("INSERT OR IGNORE INTO arrest_surrender_events VALUES (?,?,?,?,?,?,?,?,?,?,?)", (event_id, item["id"], person_ids[person_name], event_type, (item["registered"] + timedelta(days=1)).isoformat(), "KA", "SYN-DST-01", item["station"], item["officer"], item["court"], arrest_sr))
+            event_id = f"FIR-ARR-{index:03d}"
+            event_at = (item["registered"] + timedelta(days=1)).isoformat()
+            district_id = _STATION_DISTRICT[item["station"]]
+            arrest_sr = _source_record(conn, event_id, {"CaseMasterID": item["id"], "AccusedMasterID": person_ids[person_name]}, ts)
+            conn.execute(
+                """INSERT OR IGNORE INTO arrest_surrender_events (
+                    id,case_id,event_type,event_at,state_code,district_code,police_unit_code,investigating_officer_ref,court_ref,
+                    remarks,source_record_id,created_at,updated_at,accused_person_id,occurred_at,state_id,district_id,police_unit_id,
+                    investigating_officer_id,court_id
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    event_id,
+                    item["id"],
+                    event_type,
+                    event_at,
+                    "KA",
+                    district_id,
+                    item["station"],
+                    item["officer"],
+                    item["court"],
+                    "Synthetic arrest fixture.",
+                    arrest_sr,
+                    event_at,
+                    event_at,
+                    person_ids[person_name],
+                    event_at,
+                    org["state_id"],
+                    district_id,
+                    item["station"],
+                    item["officer"],
+                    item["court"],
+                ),
+            )
         if item["chargesheet"]:
-            cs_id = f"FIR-CS-{index:03d}"; cs_sr = _source_record(conn, cs_id, {"CaseMasterID": item["id"], "FinalReportType": "CHARGESHEET"}, ts)
-            conn.execute("INSERT OR IGNORE INTO chargesheets VALUES (?,?,?,?,?,?)", (cs_id, item["id"], (item["registered"] + timedelta(days=3)).isoformat(), "CHARGESHEET", "FILED", cs_sr))
+            cs_id = f"FIR-CS-{index:03d}"
+            filed_at = (item["registered"] + timedelta(days=3)).isoformat()
+            cs_sr = _source_record(conn, cs_id, {"CaseMasterID": item["id"], "FinalReportType": "CHARGESHEET"}, ts)
+            conn.execute(
+                """INSERT OR IGNORE INTO chargesheets (
+                    id,case_id,filed_at,report_type,filing_officer_ref,summary,source_record_id,created_at,updated_at,final_report_type,status
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    cs_id,
+                    item["id"],
+                    filed_at,
+                    "A_CHARGESHEET",
+                    item["officer"],
+                    "Synthetic chargesheet fixture.",
+                    cs_sr,
+                    filed_at,
+                    filed_at,
+                    "CHARGESHEET",
+                    "FILED",
+                ),
+            )
     conn.commit()
     return official_fir_counts(repository)
 
@@ -199,11 +401,11 @@ def search_official_cases(repository, *, crime_no: str | None = None, case_no: s
     if minor_head:
         where.append("UPPER(COALESCE(f.crime_minor_head,'')) LIKE UPPER(?)"); args.append(f"%{minor_head}%")
     if person_name:
-        where.append("EXISTS (SELECT 1 FROM case_person_roles r JOIN persons p ON p.id=r.person_id WHERE r.case_id=c.id AND p.display_name LIKE ?" + (" AND r.role_type=?" if role else "") + ")")
+        where.append("EXISTS (SELECT 1 FROM case_person_roles r JOIN persons p ON p.id=r.person_id WHERE r.case_id=c.id AND p.display_name LIKE ?" + (" AND r.role=?" if role else "") + ")")
         args.append(f"%{person_name}%")
         if role: args.append(role)
     elif role:
-        where.append("EXISTS (SELECT 1 FROM case_person_roles r WHERE r.case_id=c.id AND r.role_type=?)"); args.append(role)
+        where.append("EXISTS (SELECT 1 FROM case_person_roles r WHERE r.case_id=c.id AND r.role=?)"); args.append(role)
     if act:
         where.append("EXISTS (SELECT 1 FROM case_legal_sections cl JOIN legal_acts a ON a.id=cl.act_id WHERE cl.case_id=c.id AND (a.act_code LIKE ? OR a.short_name LIKE ?))")
         args.extend((f"%{act}%", f"%{act}%"))
@@ -243,10 +445,10 @@ def official_case_360(repository, case_id: str) -> dict:
     if not row:
         raise ApiError("FIR_CASE_NOT_FOUND", "Official FIR case was not found.", 404, False)
     people = [dict(x) for x in repository.connection.execute(
-        """SELECT r.id role_id,r.role_type,r.role_order,p.id person_id,p.display_name,p.birth_year,
+        """SELECT r.id role_id,r.role role_type,r.role_sequence role_order,p.id person_id,p.display_name,p.birth_year,
                   p.identity_status,r.source_record_id
            FROM case_person_roles r JOIN persons p ON p.id=r.person_id
-           WHERE r.case_id=? ORDER BY r.role_type,r.role_order""", (case_id,)
+           WHERE r.case_id=? ORDER BY r.role,r.role_sequence""", (case_id,)
     )]
     laws = [dict(x) for x in repository.connection.execute(
         """SELECT a.act_code,a.short_name,a.description act_description,s.section_code,
@@ -261,14 +463,14 @@ def official_case_360(repository, case_id: str) -> dict:
            JOIN persons p ON p.id=ar.accused_person_id
            LEFT JOIN police_units u ON u.id=ar.police_unit_id
            LEFT JOIN police_employees e ON e.id=ar.investigating_officer_id
-           LEFT JOIN courts ct ON ct.id=ar.court_id WHERE ar.case_id=? ORDER BY ar.occurred_at""", (case_id,)
+           LEFT JOIN courts ct ON ct.id=ar.court_id WHERE ar.case_id=? ORDER BY COALESCE(ar.occurred_at, ar.event_at)""", (case_id,)
     )]
     chargesheets = [dict(x) for x in repository.connection.execute(
         "SELECT * FROM chargesheets WHERE case_id=? ORDER BY filed_at", (case_id,)
     )]
     related = [dict(x) for x in repository.connection.execute(
         """SELECT DISTINCT c2.id case_id,c2.fir_number,p.id shared_person_id,p.display_name shared_person_name,
-                  r1.role_type source_role,r2.role_type related_role
+                  r1.role source_role,r2.role related_role
            FROM case_person_roles r1 JOIN case_person_roles r2 ON r2.person_id=r1.person_id AND r2.case_id<>r1.case_id
            JOIN persons p ON p.id=r1.person_id JOIN cases c2 ON c2.id=r2.case_id
            JOIN fir_case_details f2 ON f2.case_id=c2.id WHERE r1.case_id=? ORDER BY c2.id""", (case_id,)
@@ -283,8 +485,8 @@ def related_cases_with_evidence(repository, case_id: str) -> list[dict]:
     """Return factual, source-backed relationships - never a suspicion or guilt claim."""
     rows = repository.connection.execute(
         """SELECT DISTINCT c2.id case_id,c2.fir_number,c2.crime_number,c2.offence,c2.status,
-                  p.id shared_person_id,p.display_name shared_person_name,r1.role_type source_role,
-                  r2.role_type related_role,r1.source_record_id source_role_record,r2.source_record_id related_role_record
+                  p.id shared_person_id,p.display_name shared_person_name,r1.role source_role,
+                  r2.role related_role,r1.source_record_id source_role_record,r2.source_record_id related_role_record
            FROM case_person_roles r1
            JOIN case_person_roles r2 ON r2.person_id=r1.person_id AND r2.case_id<>r1.case_id
            JOIN persons p ON p.id=r1.person_id

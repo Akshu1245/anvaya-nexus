@@ -6,7 +6,7 @@ from backend.anvaya.repositories.search_filter import CaseSearchFilter
 
 def test_case_master_fields_and_fixture(app):
  r=app.extensions["repository"]; generate(r,app.config,"test")
- assert r.schema_version()==15 and r.table_count("cases")==30
+ assert r.schema_version()==16 and r.table_count("cases")==30
  row=r.find_case_360_case("SYN-CASE-0001")
  assert row["case_number"] and row["incident_from_at"] and row["information_received_at"] and row["brief_facts"]
  assert r.search_case_candidates(CaseSearchFilter(crime_number=row["crime_number"],source_system_ids=("CCTNS_REPLICA",)))

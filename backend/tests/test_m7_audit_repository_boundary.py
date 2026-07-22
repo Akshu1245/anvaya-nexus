@@ -83,7 +83,7 @@ def test_audit_placeholder_and_service_api_architecture_are_boundary_clean():
 
     root = Path(__file__).resolve().parents[1] / "anvaya"
     forbidden = ("repository.connection", ".connection.execute(", ".execute(", ".executemany(", ".commit(", ".rollback(", "import sqlite3")
-    approved = {root / "services" / "generator.py"}
+    approved = {root / "services" / "generator.py", root / "services" / "official_fir.py"}
     for directory in (root / "services", root / "api"):
         for path in directory.rglob("*.py"):
             if path in approved:

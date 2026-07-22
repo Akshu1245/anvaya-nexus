@@ -12,6 +12,7 @@ app-config.json
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest-tmp/
 _tmp_pytest*/
 .venv/
 venv/
