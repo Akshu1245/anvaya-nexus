@@ -62,7 +62,15 @@ export const m3Api={
  networkClusters:(investigationId:string,caseId:string)=>call<any>(`/api/investigations/${investigationId}/cases/${caseId}/network-clusters`),
  updateFirAssurance:(investigationId:string,caseId:string,findingId:string,payload:object)=>call<any>(`/api/investigations/${investigationId}/cases/${caseId}/assurance/${findingId}`,{method:'PATCH',body:JSON.stringify(payload)}),
  discover:(id:string,plan:object)=>call<any>(`/api/investigations/${id}/discover`,{method:'POST',body:JSON.stringify(plan)}),
- case360:(id:string,purpose:string)=>call<any>(`/api/cases/${id}/360?purpose=${encodeURIComponent(purpose)}`),
+ case360:(id:string,purpose:string,sources?:string[])=>{
+  const qs=new URLSearchParams({purpose})
+  if(sources?.length)qs.set('sources',sources.join(','))
+  return call<any>(`/api/cases/${id}/360?${qs}`)
+ },
+ investigationCase360:(investigationId:string,caseId:string,sources?:string[])=>{
+  const qs=sources?.length?`?sources=${encodeURIComponent(sources.join(','))}`:''
+  return call<any>(`/api/investigations/${investigationId}/cases/${caseId}/360${qs}`)
+ },
  passport:(id:string,purpose:string)=>call<any>(`/api/source-passports/${id}?purpose=${encodeURIComponent(purpose)}`),
  path:(from:string,to:string,purpose:string)=>call<any>(`/api/relationships/path?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&purpose=${encodeURIComponent(purpose)}`),
  dna:(left:string,right:string,purpose:string)=>call<any>(`/api/m5/case-dna/${left}/${right}?purpose=${encodeURIComponent(purpose)}`), graph:(id:string,purpose:string)=>call<any>(`/api/m5/graph/${id}?purpose=${encodeURIComponent(purpose)}`), assurance:(id:string,purpose:string)=>call<any>(`/api/m5/assurance/${id}?purpose=${encodeURIComponent(purpose)}`), verify:(left:string,right:string,purpose:string)=>call<any>(`/api/m5/verify/${left}/${right}?purpose=${encodeURIComponent(purpose)}`), challenge:(id:string,hypothesis:string,purpose:string)=>call<any>(`/api/m5/challenge/${id}?purpose=${encodeURIComponent(purpose)}`,{method:'POST',body:JSON.stringify({hypothesis})}), actions:(id:string,purpose:string)=>call<any>(`/api/m5/actions/${id}?purpose=${encodeURIComponent(purpose)}`),

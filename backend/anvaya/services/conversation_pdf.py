@@ -74,7 +74,10 @@ def conversation_pdf(turns: list[dict], investigation_title: str, investigation_
         role = _safe(turn.get("role") or "unknown").upper()
         kind = _safe(turn.get("kind") or "text")
         created = _safe(turn.get("created_at") or "")
-        text = _safe(turn.get("text") or "")[:4000]
+        text = str(turn.get("text") or "").strip()
+        if not text:
+            text = str(turn.get("summary") or "").strip()
+        text = _safe(text)[:4000]
         story.append(Paragraph(f"<b>{index}. {role}</b> · {kind} · {created}<br/>{text}", styles["ConvTurn"]))
     document.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
     return buffer.getvalue()

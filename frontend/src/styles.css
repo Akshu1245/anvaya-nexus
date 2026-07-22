@@ -100,6 +100,30 @@ details[open] > *:not(summary) {
   }
 }
 
+/* Portal button / modal motion (KSP realism) */
+.btn-portal {
+  @apply transition-all duration-200 ease-out;
+}
+.btn-portal:hover {
+  transform: translateY(-1px);
+}
+.btn-portal:active {
+  transform: translateY(0) scale(0.98);
+}
+.portal-modal-enter {
+  animation: portalModalIn 0.22s ease-out;
+}
+@keyframes portalModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {

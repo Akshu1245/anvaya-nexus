@@ -6,7 +6,7 @@ ANVAYA uses OpenRouter **free-tier** routing by default (`openrouter/free` plus 
 
 ## "How does this satisfy conversational AI?"
 
-Investigators type or speak questions in English, Kannada (ಕನ್ನಡ), Hindi, or code-mixed. The AI interprets the question, the officer confirms or edits the interpretation in the chat thread, and the AI composes a grounded natural-language answer cited back to specific source record IDs. Sarvam `bulbul:v3` reads answers aloud in the chosen language. Follow-up questions carry bounded context through the thread. Every answer shows an engine badge (AI-assisted or Deterministic), all cited source record IDs, and a "human review required" notice.
+ANVAYA is a **form-first KSP-style portal** with a **chat assist**. Investigators type or speak questions in English, Kannada (ಕನ್ನಡ), or code-mixed (Hindi speech when Sarvam is enabled). Optional AI interprets the question into a bounded plan; the officer confirms or edits filters on the Search section before any retrieval. Answers and briefs stay source-cited. Sarvam `bulbul:v3` can read answers aloud when voice is enabled. Chat assist phrases (`shift briefing`, `send me PDF`, `open case SYN-CASE-0001`) open portal sections and drawers — they do not dump Case 360 into an endless transcript. Every AI path shows an engine badge (AI-assisted or Deterministic), cited source record IDs, and a "human review required" notice. Without API keys, the deterministic parser and templates keep the same safety story.
 
 ## "Is this predictive policing?"
 
@@ -38,7 +38,7 @@ Report only measured backend/frontend tests, briefing determinism, seeded defect
 
 ## "Why should this reach the finals?"
 
-ANVAYA demonstrates a coherent live workflow where real AI-assisted multilingual conversation, daily briefing, policy, provenance, explainability, comparison, verification priorities, accessibility fallback, data quality, and limitations are working product behavior rather than presentation claims. Its strongest competitive position is accountable, AI-powered investigation support — with a full deterministic fallback so the safety story holds even without API keys.
+ANVAYA demonstrates a coherent live **government-portal** workflow: form-first search with confirmation, Case 360 drawer with provenance, descriptive briefing/trends (not forecasts), candidate network clusters (not guilt), watermarked dossier PDF, optional AI/voice with fail-closed fallback, and accountable policy/masking. Its strongest competitive position is accountable investigation support — with a full deterministic fallback so the safety story holds even without API keys.
 
 ## "Is the PDF a real charge-sheet?"
 
@@ -50,4 +50,4 @@ No. Exhibit images are **generated watermarked synthetic assets** (PNG) with exh
 
 ## "What is still missing?"
 
-Production voice STT validation at scale, financial transaction analysis, socio-economic correlation, crime forecasting, live KSP/CCTNS integration / attachment sync, production identity, managed persistent storage, and operational certification. Catalyst read-only mode does not claim full FIR Case 360 / dossier parity with the AppSail SQLite path.
+Production voice STT validation at scale, full Hindi UI chrome (voice-only when Sarvam on), financial transaction analysis, socio-economic correlation, crime forecasting, live KSP/CCTNS integration / attachment sync, production identity, managed persistent storage, exhibit image thumbnails in Case 360 UI (images embed in dossier PDF), supervisor review console beyond review-only gate, and operational certification. Catalyst read-only mode does not claim full FIR Case 360 / dossier parity with the AppSail SQLite path.

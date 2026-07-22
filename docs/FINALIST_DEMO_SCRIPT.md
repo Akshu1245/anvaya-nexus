@@ -1,4 +1,4 @@
-# ANVAYA NEXUS finalist demo script (chat-first)
+# ANVAYA NEXUS finalist demo script (portal-first)
 
 Canonical URL: <https://appsail-50044124045.development.catalystappsail.in/>
 
@@ -9,53 +9,47 @@ Canonical URL: <https://appsail-50044124045.development.catalystappsail.in/>
 3. Close developer tools, notifications, password managers, and unrelated tabs.
 4. Never show AppSail secrets, cookies, tokens, private role passwords, or raw source payloads.
 5. Rehearse the exact journey twice; record the third clean run.
-6. Confirm coach → confirm → Case 360 → dossier PDF path works; optional AI Assist / Sarvam only if keys are live.
+6. Confirm form Search → Case 360 drawer → dossier PDF preview → ಕನ್ನಡ chrome path works.
 
 ## Spoken walkthrough
 
 ### 0:00–0:25 — Problem and live proof
 
-“Investigators start every shift asking three questions: what changed, what needs attention, and what evidence supports it. ANVAYA is an Investigation Intelligence Prototype — synthetic datathon only, not live KSP or CCTNS. Health is green.”
+“Investigators start every shift asking three questions: what changed, what needs attention, and what evidence supports it. ANVAYA is an Investigation Intelligence Prototype on a Karnataka State Police–style portal — synthetic datathon only, not live KSP or CCTNS. Health is green.”
 
-Open **public demo**. If the first-run coach appears, click through once to show training-free guidance, then continue.
+Open **public demo**. Toggle **ಕನ್ನಡ | English** once so the chrome switches, then return to English if needed.
 
-### 0:25–0:55 — Chat-first Shift Intelligence
+### 0:25–0:55 — Form-first Search
 
-“There is one chat surface. I ask ‘Show my shift briefing.’ ANVAYA returns a policy-scoped briefing: source health, recorded FIR-volume deltas, month-of-year seasonality, unusual volume flags, Record Assurance findings, factual network leads, and stored MO co-occurrence. Review-only — never a forecast or person-risk score.”
+“This is not infinite chat scroll. Top nav opens real sections: Search, Shift Briefing, Crime Trends, Chat assist. On Search I set visible FIR filters — offence, status, station — or paste a golden query and click Preview. I confirm **Search records** myself.”
 
-### 0:55–1:25 — Conversational interpretation
+### 0:55–1:20 — Discover results
 
-“I paste the golden query: ‘Last three months alli Jayanagar hatra similar unresolved chain-snatching cases show maadi.’ Before anything executes, ANVAYA shows how it read the question. I can edit filters. Confirm **Search records** myself — the guided demo never auto-confirms.”
+“Results appear in a results list, not buried in a transcript. Policy, purpose, sources, jurisdiction and masking stay server-side. Open the first candidate with **Open Case 360** — it opens a drawer overlay.”
 
-### 1:25–1:50 — Discover
+### 1:20–2:00 — Verify in Case 360 drawer
 
-“Results are authorised synthetic FIR records. Policy, source selection, purpose, jurisdiction, masking, and limits are enforced by Flask. We never calculate guilt, threat, or person-risk scores.”
+“Case 360 shows FIR summary, people including witnesses, statements, investigating officer, exhibits (images embed in the dossier PDF), and Record Assurance. From the drawer I can open Related, Graph, Network clusters, Priorities, then **Prepare brief**.”
 
-Open the first candidate with **Open Case 360**.
+### 2:00–2:30 — Briefing / Trends sections
 
-### 1:50–2:25 — Verify
+“Nav **Shift Briefing** and **Crime Trends** load authorised analytics. Trends show month-of-year seasonality and MO co-occurrence — descriptive only, never a forecast.”
 
-“Case 360 shows FIR summary, people including witnesses where seeded, statements, acts/sections, organisation with investigating officer, exhibits with custody events, and Record Assurance. Every claim cites a source passport. I can ask ‘complete details’ or ‘send me PDF’ in natural language.”
+### 2:30–2:55 — Report PDF
 
-### 2:25–2:55 — Report
-
-“Download the **Synthetic Investigation Dossier (DRAFT)**. Cover is IIF-inspired, watermarked, not a charge-sheet. Exhibits are watermarked placeholders — never offence icons. Optionally export the conversation PDF from Help.”
+“Prepare brief opens a **preview modal** before download. Download the Synthetic Investigation Dossier (DRAFT). Optionally use Chat assist phrases like ‘send me PDF’ — they open the same preview, they do not dump Case 360 into endless scroll.”
 
 ### 2:55–3:15 — Close
 
-“ANVAYA is fail-closed: timeouts, retries, ErrorBoundary, and deterministic OpenRouter free-model fallback. Strong on conversation, decision support, explainability, and governance; partial on network clusters and descriptive trends; intentionally out of scope for sociology, finance, forecasting, and person-risk.”
+“ANVAYA is fail-closed: timeouts, retries, ErrorBoundary, and deterministic OpenRouter free-model fallback. Strong on conversation assist, decision support, explainability, and governance; partial on network clusters and descriptive trends; intentionally out of scope for sociology, finance, forecasting, and person-risk.”
 
 ## Phrases to show on camera
 
-- `Show my shift briefing`
-- `Show recorded crime trends`
-- Golden query (code-mixed)
-- `complete details` / `send me PDF`
-- `export chat`
-- `show network clusters for SYN-CASE-0001`
+- Form filters: offence `Chain snatching`, status `UNRESOLVED`, then Search
+- Nav: Shift Briefing / Crime Trends
+- Chat assist: `send me PDF`, `Open case SYN-CASE-0001`
+- Language: ಕನ್ನಡ chrome toggle
 
-## Do not say
+## Guardrails to say once
 
-- Live CCTNS / official FIR filed / court-ready charge-sheet
-- Predictive policing / person risk / guilt from relationships
-- Absolute “never crashes” — say fail-closed recovery instead
+“Synthetic data only. No live CCTNS. No guilt, risk, or identity inference. Human review required.”

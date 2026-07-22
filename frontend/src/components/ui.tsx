@@ -1,6 +1,10 @@
 import {useEffect,useState,type ReactNode} from 'react'
+import {useLocale,type Locale} from '../i18n/portal'
+import {btnDanger,btnOutline} from './PortalButtons'
 
 export type JourneyStage='ASK'|'DISCOVER'|'VERIFY'|'PRIORITISE'|'REPORT'
+export type PortalSection='search'|'briefing'|'trends'|'chat'|'about'|'helplines'|'privacy'|'screen-reader'
+
 const stages:Array<{id:JourneyStage;label:string;description:string}>=[
  {id:'ASK',label:'Ask',description:'Interpret your question'},
  {id:'DISCOVER',label:'Discover',description:'Review returned FIRs'},
@@ -13,7 +17,7 @@ export function JourneyStepper({current,onSelect,maxReached}:{current:JourneySta
  const order=stages.map(item=>item.id)
  const currentIndex=order.indexOf(current)
  const maxIndex=order.indexOf(maxReached||current)
- return <ol className="grid gap-2 overflow-x-auto pb-1 sm:grid-cols-5" aria-label="Investigation journey">{stages.map((item,index)=>{const state=index<currentIndex?'Complete':index===currentIndex?'Current':index<=maxIndex?'Available':'Locked';const clickable=Boolean(onSelect)&&index<=maxIndex;return <li key={item.id} aria-current={state==='Current'?'step':undefined}><button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`w-full min-w-36 rounded-xl border p-3 text-left ${state==='Current'?'border-teal-700 bg-teal-700 text-white':state==='Complete'||state==='Available'?'border-teal-200 bg-teal-50 text-teal-950 hover:bg-teal-100':'border-slate-200 bg-white text-slate-400'}`}><div className="flex justify-between gap-2"><b className="text-xs uppercase tracking-wide">{item.label}</b><span className="text-[10px]">{state}</span></div><p className="mt-1 text-xs">{item.description}</p></button></li>})}</ol>
+ return <ol className="grid gap-2 overflow-x-auto pb-1 sm:grid-cols-5" aria-label="Investigation journey">{stages.map((item,index)=>{const state=index<currentIndex?'Complete':index===currentIndex?'Current':index<=maxIndex?'Available':'Locked';const clickable=Boolean(onSelect)&&index<=maxIndex;return <li key={item.id} aria-current={state==='Current'?'step':undefined}><button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`btn-portal w-full min-w-36 rounded-xl border p-3 text-left ${state==='Current'?'border-teal-700 bg-teal-700 text-white':state==='Complete'||state==='Available'?'border-teal-200 bg-teal-50 text-teal-950 hover:bg-teal-100':'border-slate-200 bg-white text-slate-400'}`}><div className="flex justify-between gap-2"><b className="text-xs uppercase tracking-wide">{item.label}</b><span className="text-[10px]">{state}</span></div><p className="mt-1 text-xs">{item.description}</p></button></li>})}</ol>
 }
 
 function KspEmblem(){
@@ -27,53 +31,52 @@ function KspEmblem(){
  </svg>
 }
 
-const navItems=[
- {label:'Investigation Chat',target:'main-content'},
- {label:'About ANVAYA',target:'about-anvaya'},
- {label:'Helplines',target:'helplines'},
- {label:'Privacy',target:'privacy'},
- {label:'Screen Reader',target:'screen-reader'},
-]
-
-function scrollToSection(id:string){
+export function scrollToSection(id:string){
  const el=document.getElementById(id)
  if(!el)return
  el.scrollIntoView({behavior:'smooth',block:'start'})
  if(el.tabIndex<0)el.tabIndex=-1
- el.focus({preventScroll:true})
+ try{el.focus({preventScroll:true})}catch{/* ignore */}
 }
 
 const helplineEntries=[
- {icon:'🚨',label:'Emergency Response',number:'112'},
- {icon:'👮',label:'Police Control Room',number:'100'},
- {icon:'👩',label:'Women Helpline',number:'1091'},
- {icon:'🧒',label:'Child Helpline',number:'1098'},
- {icon:'💻',label:'Cyber Crime',number:'1930'},
- {icon:'🚦',label:'Traffic Helpline',number:'103'},
+ {icon:'🚨',labelKey:'Emergency Response',labelKn:'ತುರ್ತು ಪ್ರತಿಕ್ರಿಯೆ',number:'112'},
+ {icon:'👮',labelKey:'Police Control Room',labelKn:'ಪೊಲೀಸ್ ನಿಯಂತ್ರಣ ಕೊಠಡಿ',number:'100'},
+ {icon:'👩',labelKey:'Women Helpline',labelKn:'ಮಹಿಳಾ ಸಹಾಯವಾಣಿ',number:'1091'},
+ {icon:'🧒',labelKey:'Child Helpline',labelKn:'ಮಕ್ಕಳ ಸಹಾಯವಾಣಿ',number:'1098'},
+ {icon:'💻',labelKey:'Cyber Crime',labelKn:'ಸೈಬರ್ ಅಪರಾಧ',number:'1930'},
+ {icon:'🚦',labelKey:'Traffic Helpline',labelKn:'ಸಂಚಾರ ಸಹಾಯವಾಣಿ',number:'103'},
 ]
 
-function AboutAnvayaSection(){
- return <section id="about-anvaya" aria-labelledby="about-anvaya-title" className="scroll-mt-6 border-t border-slate-200 bg-white">
+function AboutAnvayaSection({locale}:{locale:Locale}){
+ const {t}=useLocale()
+ return <section id="about-anvaya" tabIndex={-1} aria-labelledby="about-anvaya-title" className="scroll-mt-6 border-t border-slate-200 bg-white outline-none">
   <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">About ANVAYA</p>
-   <h2 id="about-anvaya-title" className="mt-1 text-2xl font-bold text-navy-950">What we built, and why it matters</h2>
+   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-700">{t('nav.about')}</p>
+   <h2 id="about-anvaya-title" className="mt-1 text-2xl font-bold text-navy-950">{t('aboutTitle')}</h2>
    <div className="mt-4 grid gap-6 lg:grid-cols-[2fr_1fr]">
     <div className="space-y-4 text-sm leading-6 text-slate-700">
-     <p><b>ANVAYA</b> (ಅನ್ವಯ — "connection") is a conversational investigation-intelligence prototype built for the Karnataka State Police Datathon. Instead of forcing officers through separate menus for search, briefings, trends and reports, ANVAYA gives one chat surface: ask in plain language — typed or spoken — and it answers only from authorised synthetic FIR records, with a citation for every factual claim.</p>
-     <p><b>What we built.</b> A grounded question-answering pipeline over a synthetic CCTNS-style dataset (FIRs, persons, vehicles, exhibits, documents, arrests and chargesheets); a Case 360 view that assembles the complete dossier for any case; shift briefings and descriptive crime-trend summaries (seasonality and modus-operandi patterns, never forecasts); candidate network clusters that connect related cases through recorded facts alone; and one-command exports — a cited Investigation Dossier PDF and a full conversation-transcript PDF, both watermarked as synthetic.</p>
-     <p><b>What we integrated.</b> AI assist runs on OpenRouter free-tier open models with deterministic fallbacks, so the system stays useful even when no model responds. Optional multilingual voice (Kannada, Hindi, English) is powered by Sarvam AI speech and translation models. The frontend is React + Vite + Tailwind; the backend is Python with a SQLite synthetic store, deployable on Zoho Catalyst. Every AI-assisted answer passes a human-confirmation gate before anything is retrieved.</p>
-     <p><b>Guardrails first.</b> No source, no factual claim. Sensitive identifiers are masked by policy, the system never infers guilt, risk or identity, and nothing here connects to live KSP or CCTNS systems. Every screen and export carries the synthetic-prototype notice, because trust is the feature.</p>
+     <p>{t('aboutLead')}</p>
+     {locale==='kn'
+      ?<>
+        <p><b>ನಾವು ನಿರ್ಮಿಸಿದ್ದು.</b> ಸಂಶ್ಲೇಷಿತ CCTNS-ಶೈಲಿ FIR ದತ್ತಾಂಶದ ಮೇಲೆ ಆಧಾರಿತ ಪ್ರಶ್ನೋತ್ತರ, Case 360 ಡಾಸಿಯರ್, ಶಿಫ್ಟ್ ಬ್ರೀಫಿಂಗ್, ವಿವರಣಾತ್ಮಕ ಪ್ರವೃತ್ತಿಗಳು, ಅಭ್ಯರ್ಥಿ ನೆಟ್‌ವರ್ಕ್ ಕ್ಲಸ್ಟರ್‌ಗಳು ಮತ್ತು ಉಲ್ಲೇಖಿತ PDF ರಫ್ತುಗಳು.</p>
+        <p><b>ಸಂಯೋಜನೆಗಳು.</b> OpenRouter ಉಚಿತ ಮಾದರಿಗಳು, ಐಚ್ಛಿಕ ಸರ್ವಮ್ ಧ್ವನಿ (ಕನ್ನಡ/ಹಿಂದಿ/ಇಂಗ್ಲಿಷ್), React + Vite + Tailwind, Python + SQLite, Zoho Catalyst ನಿಯೋಜನೆ.</p>
+        <p><b>ರಕ್ಷಣಾ ಗೇಟ್‌ಗಳು.</b> ಮೂಲವಿಲ್ಲದೆ ಹಕ್ಕು ಇಲ್ಲ; ಮಾಸ್ಕಿಂಗ್; ಮಾನವ ದೃಢೀಕರಣ; ಲೈವ್ KSP/CCTNS ಸಂಪರ್ಕವಿಲ್ಲ.</p>
+       </>
+      :<>
+        <p><b>What we built.</b> Grounded Q&amp;A over synthetic CCTNS-style FIR data; Case 360 dossiers; shift briefings; descriptive seasonality and MO trends (never forecasts); candidate network clusters from recorded facts; cited Investigation Dossier and conversation PDFs.</p>
+        <p><b>What we integrated.</b> OpenRouter free-tier models with deterministic fallbacks; optional Sarvam AI multilingual voice; React + Vite + Tailwind; Python + SQLite on Zoho Catalyst. Every AI-assisted answer passes a human-confirmation gate.</p>
+        <p><b>Guardrails first.</b> No source, no factual claim. Masking by policy. Never infers guilt, risk or identity. No live KSP or CCTNS connection.</p>
+       </>}
     </div>
     <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-5">
-     <p className="text-xs font-bold uppercase tracking-wide text-teal-800">At a glance</p>
+     <p className="text-xs font-bold uppercase tracking-wide text-teal-800">{locale==='kn'?'ಸಂಕ್ಷಿಪ್ತ ನೋಟ':'At a glance'}</p>
      <ul className="mt-3 space-y-2 text-sm text-teal-950">
-      <li>• One chat for search, briefing, trends, Case 360 and reports</li>
-      <li>• Citation-backed answers from synthetic FIR records only</li>
-      <li>• Cited dossier PDF + conversation PDF exports</li>
-      <li>• Candidate network clusters from recorded facts</li>
-      <li>• OpenRouter free models with deterministic fallback</li>
-      <li>• Kannada / Hindi / English voice via Sarvam AI (optional)</li>
-      <li>• Human confirmation gate, masking, synthetic watermarks</li>
+      <li>• {locale==='kn'?'ಫಾರ್ಮ್-ಮೊದಲು ಹುಡುಕಾಟ + ಚಾಟ್ ಸಹಾಯ':'Form-first search + chat assist'}</li>
+      <li>• {locale==='kn'?'ಮೂಲ-ಉಲ್ಲೇಖಿತ ಉತ್ತರಗಳು':'Citation-backed answers'}</li>
+      <li>• {locale==='kn'?'ಡಾಸಿಯರ್ PDF + ಸಂಭಾಷಣೆ PDF':'Dossier PDF + conversation PDF'}</li>
+      <li>• {locale==='kn'?'ಅಭ್ಯರ್ಥಿ ನೆಟ್‌ವರ್ಕ್ ಕ್ಲಸ್ಟರ್‌ಗಳು':'Candidate network clusters'}</li>
+      <li>• {locale==='kn'?'ಕನ್ನಡ / ಇಂಗ್ಲಿಷ್ UI · ಧ್ವನಿ ಐಚ್ಛಿಕ':'English + Kannada UI · voice optional'}</li>
      </ul>
     </div>
    </div>
@@ -81,42 +84,72 @@ function AboutAnvayaSection(){
  </section>
 }
 
-function HelplinesSection(){
- return <section id="helplines" aria-labelledby="helplines-title" className="scroll-mt-6 border-t border-slate-200 bg-navy-950">
+function HelplinesSection({locale}:{locale:Locale}){
+ const {t}=useLocale()
+ return <section id="helplines" tabIndex={-1} aria-labelledby="helplines-title" className="scroll-mt-6 border-t border-slate-200 bg-navy-950 outline-none">
   <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-   <h2 id="helplines-title" className="text-lg font-bold uppercase tracking-wide text-teal-300">Helplines</h2>
-   <p className="mt-1 text-sm text-slate-400">These national helpline numbers are real and available 24×7. Everything else in this prototype is synthetic.</p>
+   <h2 id="helplines-title" className="text-lg font-bold uppercase tracking-wide text-teal-300">{t('helplinesTitle')}</h2>
+   <p className="mt-1 text-sm text-slate-400">{t('helplinesLead')}</p>
    <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-    {helplineEntries.map(entry=><a key={entry.number} href={`tel:${entry.number}`} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center transition-colors hover:border-teal-400/60 hover:bg-white/10">
+    {helplineEntries.map(entry=><a key={entry.number} href={`tel:${entry.number}`} className={`${btnDanger} flex-col !h-auto !py-4 text-center`}>
      <span className="text-2xl" aria-hidden>{entry.icon}</span>
-     <p className="mt-1 text-3xl font-black leading-none text-white">{entry.number}</p>
-     <p className="mt-2 text-sm font-semibold text-slate-300">{entry.label}</p>
+     <p className="mt-1 text-3xl font-black leading-none">{entry.number}</p>
+     <p className="mt-2 text-sm font-semibold text-red-100">{locale==='kn'?entry.labelKn:entry.labelKey}</p>
     </a>)}
    </div>
   </div>
  </section>
 }
 
-export function ApplicationShell({children}:{children:ReactNode}){
- const [online,setOnline]=useState(()=>navigator.onLine)
- const today=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
- useEffect(()=>{const up=()=>setOnline(true),down=()=>setOnline(false);window.addEventListener('online',up);window.addEventListener('offline',down);return()=>{window.removeEventListener('online',up);window.removeEventListener('offline',down)}},[])
- return <div className="min-h-screen bg-[#eef2f4] text-slate-950">
-  <a href="#main-content" className="sr-only z-50 rounded bg-white px-4 py-3 font-semibold text-navy-950 focus:not-sr-only focus:absolute focus:left-4 focus:top-4">Skip to workspace</a>
+type ShellProps={
+ children:ReactNode
+ activeSection?:PortalSection
+ onNavigate?:(section:PortalSection)=>void
+}
 
-  {/* Government top strip */}
+export function ApplicationShell({children,activeSection='search',onNavigate}:ShellProps){
+ const {locale,setLocale,t}=useLocale()
+ const [online,setOnline]=useState(()=>navigator.onLine)
+ const today=new Date().toLocaleDateString(locale==='kn'?'kn-IN':'en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+ useEffect(()=>{const up=()=>setOnline(true),down=()=>setOnline(false);window.addEventListener('online',up);window.addEventListener('offline',down);return()=>{window.removeEventListener('online',up);window.removeEventListener('offline',down)}},[])
+
+ const go=(section:PortalSection)=>{
+  onNavigate?.(section)
+  if(section==='about'||section==='helplines'||section==='privacy'||section==='screen-reader'){
+   const id=section==='screen-reader'?'screen-reader':section==='about'?'about-anvaya':section
+   requestAnimationFrame(()=>scrollToSection(id))
+  }else{
+   requestAnimationFrame(()=>scrollToSection('main-content'))
+  }
+ }
+
+ const navItems:Array<{label:string;section:PortalSection}>=[
+  {label:t('nav.search'),section:'search'},
+  {label:t('nav.briefing'),section:'briefing'},
+  {label:t('nav.trends'),section:'trends'},
+  {label:t('nav.chat'),section:'chat'},
+  {label:t('nav.about'),section:'about'},
+  {label:t('nav.helplines'),section:'helplines'},
+ ]
+
+ return <div className="min-h-screen bg-[#eef2f4] text-slate-950">
+  <a href="#main-content" className="sr-only z-50 rounded bg-white px-4 py-3 font-semibold text-navy-950 focus:not-sr-only focus:absolute focus:left-4 focus:top-4">{t('skipWorkspace')}</a>
+
   <div className="bg-navy-950 text-[11px] text-slate-300">
    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-5 py-1.5 sm:px-8">
     <span className="font-medium tracking-wide">ಕರ್ನಾಟಕ ಸರ್ಕಾರ · Government of Karnataka</span>
     <span className="flex flex-wrap items-center gap-3">
      <span className="hidden sm:inline">{today}</span>
-     <button type="button" onClick={()=>scrollToSection('screen-reader')} className="hidden border-l border-slate-600 pl-3 hover:text-white sm:inline">Screen Reader Access</button>
-     <span className="border-l border-slate-600 pl-3 font-semibold text-teal-300">ಕನ್ನಡ | English</span>
+     <button type="button" onClick={()=>go('screen-reader')} className="hidden border-l border-slate-600 pl-3 hover:text-white sm:inline">{t('nav.screenReader')}</button>
+     <span className="flex items-center gap-1 border-l border-slate-600 pl-3" role="group" aria-label="Language">
+      <button type="button" aria-pressed={locale==='kn'} onClick={()=>setLocale('kn')} className={`btn-portal rounded px-2 py-0.5 font-semibold ${locale==='kn'?'bg-teal-700 text-white':'text-teal-300 hover:text-white'}`}>{t('kannada')}</button>
+      <span aria-hidden>|</span>
+      <button type="button" aria-pressed={locale==='en'} onClick={()=>setLocale('en')} className={`btn-portal rounded px-2 py-0.5 font-semibold ${locale==='en'?'bg-teal-700 text-white':'text-teal-300 hover:text-white'}`}>{t('english')}</button>
+     </span>
     </span>
    </div>
   </div>
 
-  {/* Main portal header */}
   <header className="border-b-4 border-[#c9a227] bg-white shadow-sm">
    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
     <div className="flex items-center gap-4">
@@ -124,91 +157,89 @@ export function ApplicationShell({children}:{children:ReactNode}){
      <div className="animate-fade-in">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್</p>
       <p className="text-xl font-bold leading-tight text-navy-950 sm:text-2xl">Karnataka State Police</p>
-      <h1 className="mt-0.5 text-sm font-semibold text-teal-700">Investigation Intelligence Prototype</h1>
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Ask. Discover. Verify. Brief.</h2>
+      <h1 className="mt-0.5 text-sm font-semibold text-teal-700">{locale==='kn'?'ತನಿಖಾ ಬುದ್ಧಿಮತ್ತೆ ಮಾದರಿ':'Investigation Intelligence Prototype'}</h1>
+      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{locale==='kn'?'ಕೇಳಿ. ಕಂಡುಹಿಡಿಯಿರಿ. ಪರಿಶೀಲಿಸಿ. ವರದಿ.':'Ask. Discover. Verify. Brief.'}</h2>
      </div>
     </div>
     <div className="flex items-center gap-3">
-     <div className="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-center md:block">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-red-700">Emergency</p>
-      <p className="text-2xl font-black leading-none text-red-700">112</p>
-     </div>
+     <a href="tel:112" className={`${btnDanger} hidden !px-4 !py-2 text-center md:flex md:flex-col`}>
+      <span className="text-[10px] font-bold uppercase tracking-wide">{t('emergency')}</span>
+      <span className="text-2xl font-black leading-none">112</span>
+     </a>
      <div className="rounded-xl bg-gradient-to-br from-navy-900 to-teal-900 px-4 py-2 text-white shadow-sm">
       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">ANVAYA</p>
-      <p className="text-sm font-semibold leading-tight">Investigation Intelligence Prototype</p>
+      <p className="text-sm font-semibold leading-tight">{locale==='kn'?'ತನಿಖಾ ಪೋರ್ಟಲ್':'Investigation Portal'}</p>
      </div>
-     <span aria-live="polite" className={online?'hidden rounded-full border border-teal-600/40 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800 lg:inline':'rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-950'}>{online?'● Online':'Offline — data access paused'}</span>
+     <span aria-live="polite" className={online?'hidden rounded-full border border-teal-600/40 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800 lg:inline':'rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-950'}>{online?t('online'):t('offline')}</span>
     </div>
    </div>
-   {/* Navigation bar */}
    <nav aria-label="Portal navigation" className="bg-navy-950">
     <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-5 sm:px-8">
-     {navItems.map((item,index)=><button key={item.label} type="button" onClick={()=>scrollToSection(item.target)} className={`whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${index===0?'border-b-2 border-teal-300 bg-white/5 text-teal-300':'text-slate-300 hover:bg-white/5 hover:text-white'}`}>{item.label}</button>)}
+     {navItems.map(item=>{
+      const active=activeSection===item.section||(item.section==='about'&&activeSection==='about')
+      return <button key={item.section} type="button" onClick={()=>go(item.section)} className={`btn-portal whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wide ${active?'border-b-2 border-teal-300 bg-white/5 text-teal-300':'text-slate-300 hover:bg-white/5 hover:text-white'}`}>{item.label}</button>
+     })}
     </div>
    </nav>
-   {/* Helpline ticker strip */}
    <div className="border-t border-slate-200 bg-slate-50">
     <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-5 py-2 text-sm text-slate-700 sm:px-8">
-     <button type="button" onClick={()=>scrollToSection('helplines')} className="font-bold uppercase tracking-wide text-navy-900 underline decoration-teal-500 decoration-2 underline-offset-4 hover:text-teal-700">Helplines</button>
-     <span>🚨 Emergency <b className="text-base text-red-700">112</b></span>
-     <span>👮 Police Control <b className="text-base">100</b></span>
-     <span>👩 Women <b className="text-base">1091</b></span>
-     <span>🧒 Child <b className="text-base">1098</b></span>
-     <span>💻 Cyber Crime <b className="text-base">1930</b></span>
-     <span className="hidden sm:inline">🚦 Traffic <b className="text-base">103</b></span>
+     <button type="button" onClick={()=>go('helplines')} className="font-bold uppercase tracking-wide text-navy-900 underline decoration-teal-500 decoration-2 underline-offset-4 hover:text-teal-700">{t('nav.helplines')}</button>
+     {helplineEntries.map(entry=><a key={entry.number} href={`tel:${entry.number}`} className="hover:text-teal-800">{entry.icon} <b className={`text-base ${entry.number==='112'?'text-red-700':''}`}>{entry.number}</b></a>)}
     </div>
    </div>
   </header>
 
-  <div role="note" className="border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-center text-[11px] font-bold tracking-[0.12em] text-amber-950">SYNTHETIC DATATHON PROTOTYPE — NOT FOR OPERATIONAL USE</div>
+  <div role="note" className="border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-center text-xs font-bold tracking-[0.12em] text-amber-950 sm:text-sm">{t('prototypeBanner')}</div>
 
-  {!online&&<p role="status" className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-center text-sm text-amber-950">Your typed question remains on screen, but ANVAYA will not retrieve, cache or change FIR data while offline. Reconnect and retry manually.</p>}
+  {!online&&<p role="status" className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-center text-sm text-amber-950">{t('offline')}</p>}
 
   <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl animate-fade-in px-5 py-7 outline-none sm:px-8 sm:py-8">{children}</main>
 
-  <AboutAnvayaSection/>
-  <HelplinesSection/>
+  <AboutAnvayaSection locale={locale}/>
+  <HelplinesSection locale={locale}/>
 
-  {/* Portal footer */}
   <footer className="mt-10 bg-navy-950 text-slate-300">
    <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
     <div>
      <div className="flex items-center gap-3"><KspEmblem/><div><p className="font-bold text-white">Karnataka State Police</p><p className="text-xs text-slate-400">ANVAYA Investigation Portal</p></div></div>
-     <p className="mt-3 text-xs leading-5 text-slate-400">ANVAYA is a synthetic conversational investigation-intelligence prototype built for a datathon demonstration. It is not connected to live KSP or CCTNS systems and every output requires human review.</p>
-     <button type="button" onClick={()=>scrollToSection('about-anvaya')} className="mt-3 text-xs font-semibold text-teal-300 underline underline-offset-2 hover:text-white">Read more about ANVAYA →</button>
+     <p className="mt-3 text-sm leading-6 text-slate-400">{t('aboutLead')}</p>
+     <button type="button" onClick={()=>go('about')} className={`${btnOutline} mt-3 !border-teal-400/40 !bg-transparent !text-teal-300`}>{t('nav.about')} →</button>
     </div>
-    <div id="screen-reader" className="scroll-mt-4">
-     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">Quick Links</p>
-     <p className="mt-2 text-xs leading-5 text-slate-400">Screen-reader landmarks, keyboard navigation and a skip link are available throughout this prototype.</p>
-     <ul className="mt-3 space-y-2 text-xs">
-      {['Investigation Chat','Shift Briefing','Crime Trends','Source Passports','Case 360 View','Cited Case Briefs'].map(link=><li key={link}><button type="button" onClick={()=>scrollToSection('main-content')} className="text-slate-300 transition-colors hover:text-teal-300">{link}</button></li>)}
+    <div id="screen-reader" tabIndex={-1} className="scroll-mt-4 outline-none">
+     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">{locale==='kn'?'ತ್ವರಿತ ಲಿಂಕ್‌ಗಳು':'Quick Links'}</p>
+     <p className="mt-2 text-sm leading-6 text-slate-400">{locale==='kn'?'ಸ್ಕ್ರೀನ್-ರೀಡರ್ ಲ್ಯಾಂಡ್‌ಮಾರ್ಕ್‌ಗಳು ಮತ್ತು ಕೀಬೋರ್ಡ್ ನ್ಯಾವಿಗೇಷನ್ ಲಭ್ಯವಿದೆ.':'Screen-reader landmarks, keyboard navigation and a skip link are available throughout this prototype.'}</p>
+     <ul className="mt-3 space-y-2 text-sm">
+      {([
+       ['nav.search','search'],
+       ['nav.briefing','briefing'],
+       ['nav.trends','trends'],
+       ['nav.chat','chat'],
+      ] as const).map(([key,section])=><li key={section}><button type="button" onClick={()=>go(section)} className="text-slate-300 transition-colors hover:text-teal-300">{t(key)}</button></li>)}
      </ul>
     </div>
     <div>
-     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">Helplines</p>
+     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">{t('helplinesTitle')}</p>
      <ul className="mt-3 space-y-2 text-sm">
-      {helplineEntries.map(entry=><li key={entry.number}>{entry.label} — <b className="text-base text-white">{entry.number}</b></li>)}
+      {helplineEntries.map(entry=><li key={entry.number}><a href={`tel:${entry.number}`} className="hover:text-teal-300">{locale==='kn'?entry.labelKn:entry.labelKey} — <b className="text-base text-white">{entry.number}</b></a></li>)}
      </ul>
-     <button type="button" onClick={()=>scrollToSection('helplines')} className="mt-3 text-xs font-semibold text-teal-300 underline underline-offset-2 hover:text-white">View all helplines →</button>
+     <button type="button" onClick={()=>go('helplines')} className="mt-3 text-sm font-semibold text-teal-300 underline underline-offset-2 hover:text-white">{t('nav.helplines')} →</button>
     </div>
-    <div id="privacy" className="scroll-mt-4">
-     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">Headquarters</p>
-     <p className="mt-3 text-xs leading-5">Office of the Director General &amp; Inspector General of Police,<br/>Nrupathunga Road,<br/>Bengaluru — 560001, Karnataka</p>
-     <p className="mt-3 text-xs text-slate-400">Prototype build 2.4.1 · Synthetic datathon evaluation</p>
-     <p className="mt-3 text-xs leading-5 text-slate-400">Privacy: do not enter personal or operational information. This interface is for synthetic demonstration data only.</p>
+    <div id="privacy" tabIndex={-1} className="scroll-mt-4 outline-none">
+     <p className="text-sm font-bold uppercase tracking-wide text-teal-300">{t('privacyTitle')}</p>
+     <p className="mt-3 text-sm leading-6">Office of the Director General &amp; Inspector General of Police,<br/>Nrupathunga Road,<br/>Bengaluru — 560001, Karnataka</p>
+     <p className="mt-3 text-sm leading-6 text-slate-400">{t('privacyBody')}</p>
     </div>
    </div>
    <div className="border-t border-white/10">
-    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-5 py-3 text-[11px] text-slate-400 sm:px-8">
+    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-5 py-3 text-xs text-slate-400 sm:px-8">
      <span>© 2026 Karnataka State Police · KSP Datathon Prototype</span>
-     <span className="flex gap-4">{[
-      {label:'Privacy Policy',target:'privacy'},
-      {label:'Terms of Use',target:'privacy'},
-      {label:'About',target:'about-anvaya'},
-      {label:'Helplines',target:'helplines'},
-     ].map(link=><button key={link.label} type="button" onClick={()=>scrollToSection(link.target)} className="transition-colors hover:text-teal-300">{link.label}</button>)}</span>
+     <span className="flex gap-4">
+      <button type="button" onClick={()=>go('privacy')} className="hover:text-teal-300">{t('nav.privacy')}</button>
+      <button type="button" onClick={()=>go('about')} className="hover:text-teal-300">{t('nav.about')}</button>
+      <button type="button" onClick={()=>go('helplines')} className="hover:text-teal-300">{t('nav.helplines')}</button>
+     </span>
     </div>
-    <p className="mx-auto max-w-7xl px-5 pb-5 text-[11px] leading-5 text-slate-500 sm:px-8">No source, no factual claim. No verification, no confirmed connection. ANVAYA has no live KSP/CCTNS connection and makes no identity, guilt, risk or operational decision. Static app resources may be cached for resilience; FIR data and API responses are never stored offline.</p>
+    <p className="mx-auto max-w-7xl px-5 pb-5 text-xs leading-5 text-slate-500 sm:px-8">No source, no factual claim. No verification, no confirmed connection. ANVAYA has no live KSP/CCTNS connection and makes no identity, guilt, risk or operational decision.</p>
    </div>
   </footer>
  </div>

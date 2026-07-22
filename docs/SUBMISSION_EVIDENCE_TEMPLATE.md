@@ -8,25 +8,26 @@ All values below are owner-provided placeholders. Do not invent any value.
 | Final source ZIP SHA-256 | `TBD_OWNER_RECORDS` |
 | Public GitHub URL | `TBD_OWNER_RECORDS` |
 | Live Catalyst URL | `https://appsail-50044124045.development.catalystappsail.in/` |
-| Health-check timestamp (IST) | `2026-07-21 10:21 IST — status ok, database ok, environment production` |
+| Health-check timestamp (IST) | `TBD_OWNER_AFTER_REDEPLOY — must show status ok, database ok; record ai_assist_enabled / voice_enabled honestly` |
 | Demo-video URL | `TBD_OWNER_RECORDS` |
 | Official PPT filename | `TBD_OWNER_RECORDS` |
-| Local test command/results | `2026-07-21 winning upgrade: frontend lint + 32/32 tests + production build OK; backend analytics/evaluation harness 6/6; full backend suite 340+ passed after architecture-boundary fix` |
-| Browser and device | `Windows 10 verification host; owner to record final demo browser/version` |
-| Known limitations acknowledged | `Synthetic-only; deterministic parser/rules; descriptive trends/deltas only; optional browser voice fallback; no forecasting, financial analytics, live KSP/CCTNS, person risk or guilt scoring` |
+| Local test command/results | `2026-07-22 portal revision: frontend vitest 43/43 + production build OK; backend key suites green; full backend inventory ~377 tests` |
+| Browser and device | `Windows verification host; owner to record final demo browser/version` |
+| Known limitations acknowledged | `Synthetic-only; EN+KN UI chrome (Hindi via voice when Sarvam on); deterministic fallback without keys; descriptive trends only; exhibit images in dossier PDF (metadata in Case 360 UI); no forecasting, live KSP/CCTNS, person risk or guilt scoring; AppSail SQLite ephemeral` |
 | Rollback confirmation | `TBD_OWNER_RECORDS` |
 
-## Verified product beats for the upgraded build
+## Verified product beats for the portal build
 
-1. Landing page loads; `/api/health` returns ok/production.
-2. Password-free public demo when enabled.
-3. Shift Intelligence briefing with deltas, anomalies, quality alerts, network/MO leads.
-4. Golden journey: create investigation → editable interpretation → discover → Case 360 → Source Passport → related/compare/graph path/priorities → grounded brief preview → cited PDF → logout.
-5. Optional voice is progressive enhancement only.
+1. Landing loads; `/api/health` returns ok.
+2. Password-free public demo when enabled (Investigator only).
+3. Portal nav: Search / Shift Briefing / Crime Trends / Chat assist.
+4. Form filters or Preview → Search records → results list → Case 360 drawer → Prepare brief → dossier PDF.
+5. Briefing + trends (seasonality / MO) load from nav.
+6. ಕನ್ನಡ | English chrome toggle works; AI/voice only when health flags true.
 
 ## Owner still must record
 
-- Redeploy this final revision to AppSail so the live URL matches Shift Intelligence and stage-gated UI.
+- Redeploy this portal revision to AppSail so the live URL matches the demo script.
 - Public GitHub URL and exact commit SHA.
 - Timestamped demo video following `FINALIST_DEMO_SCRIPT.md`.
 - Official PPT using `FINALIST_PITCH_OUTLINE.md`.

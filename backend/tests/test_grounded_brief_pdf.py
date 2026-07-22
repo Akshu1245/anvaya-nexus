@@ -7,7 +7,13 @@ def test_grounded_brief_pdf_is_a_real_pdf_document():
     payload = {
         "case_id": "SYN-CASE-0001",
         "dossier_title": "Synthetic Investigation Dossier",
-        "case_snapshot": {"fir_number": "SYN-FIR-000001", "crime_number": "SYN-CRIME-00001", "status": "UNRESOLVED"},
+        "case_snapshot": {
+            "fir_number": "SYN-FIR-000001",
+            "crime_number": "SYN-CRIME-00001",
+            "status": "UNRESOLVED",
+            "investigating_officer": "ಅನ್ವಯ / अन्वेषक",
+            "station": "Synthetic Station",
+        },
         "policy": {"jurisdiction_state": "assigned_station", "masking": {"level": "NONE"}, "selected_sources": ["CCTNS_REPLICA"]},
         "sections": {
             "cover": [{"text": "Synthetic case record.", "source_record_ids": ["SRC-1"], "verification_state": "verified_from_record"}],

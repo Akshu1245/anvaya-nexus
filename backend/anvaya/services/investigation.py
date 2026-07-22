@@ -110,11 +110,22 @@ def passport(repository, user, purpose, source_record_id, station=None, district
     return result
 
 
-def case_360(repository, user, purpose, case_id):
+def _case_360_sources(selected_sources):
+    """Normalise optional Case 360 source selection; default to CCTNS replica."""
+    if isinstance(selected_sources, str):
+        selected_sources = [part.strip() for part in selected_sources.split(",") if part.strip()]
+    elif selected_sources is None:
+        selected_sources = []
+    sources = [str(item).strip() for item in selected_sources if str(item).strip()]
+    return list(dict.fromkeys(sources)) or ["CCTNS_REPLICA"]
+
+
+def case_360(repository, user, purpose, case_id, selected_sources=None):
     case = repository.find_case_360_case(case_id)
     if not case:
         raise ApiError("CASE_NOT_FOUND", "Case was not found.", 404)
-    decision = evaluate(user, purpose, ["CCTNS_REPLICA"], "CASE_REVIEW", record_station=case["station_id"], record_district=case["district_id"])
+    sources = _case_360_sources(selected_sources)
+    decision = evaluate(user, purpose, sources, "CASE_REVIEW", record_station=case["station_id"], record_district=case["district_id"])
     if not decision.allowed:
         raise ApiError(decision.denial_code or "POLICY_DENIED", decision.explanation, 403)
     # Legacy generic entity links remain in their compatibility-only routes.
@@ -152,7 +163,7 @@ def case_360(repository, user, purpose, case_id):
             "source_record_id": masked.get("source_record_id"), "masking": masked["masking"],
         })
     forensics = repository.list_case_360_forensics(case_id)
-    assurance = list_case_assurance(repository, user, purpose, case_id, ("CCTNS_REPLICA",))
+    assurance = list_case_assurance(repository, user, purpose, case_id, tuple(sources))
     issues = assurance["findings"]
     legal = repository.list_case_legal_sections(case_id, source_system_ids=("CCTNS_REPLICA",))
     classifications = repository.find_case_classifications(case_id)
@@ -359,7 +370,7 @@ def related_cases(repository, user, purpose, case_id, source_system_ids, limit=1
 
 def fir_relationship_graph(repository, user, purpose, case_id, source_system_ids, related_limit=10):
     """Build a bounded FIR relationship view from stored records and D-7 facts."""
-    detail = case_360(repository, user, purpose, case_id)
+    detail = case_360(repository, user, purpose, case_id, source_system_ids)
     max_nodes, max_edges = 75, 150
     nodes, edges, node_ids, edge_ids = [], [], set(), set()
     truncated = False

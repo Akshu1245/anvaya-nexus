@@ -84,14 +84,14 @@ def _header_footer(canvas, doc):
     canvas.setFillColor(NAVY)
     canvas.rect(0, A4[1] - 14 * mm, A4[0], 14 * mm, fill=1, stroke=0)
     canvas.setFillColor(colors.white)
-    canvas.setFont("Helvetica-Bold", 8)
+    canvas.setFont(_BODY_FONT_BOLD, 8)
     canvas.drawString(18 * mm, A4[1] - 8 * mm, "ANVAYA · SYNTHETIC INVESTIGATION DOSSIER")
-    canvas.setFont("Helvetica", 7)
+    canvas.setFont(_BODY_FONT, 7)
     canvas.drawRightString(A4[0] - 18 * mm, A4[1] - 8 * mm, "DRAFT · HUMAN REVIEW REQUIRED")
     canvas.setFillColor(LIGHT)
     canvas.rect(0, 0, A4[0], 12 * mm, fill=1, stroke=0)
     canvas.setFillColor(colors.HexColor("#64748b"))
-    canvas.setFont("Helvetica", 7)
+    canvas.setFont(_BODY_FONT, 7)
     canvas.drawString(18 * mm, 5 * mm, "SYNTHETIC DATATHON PROTOTYPE — NOT FOR OPERATIONAL USE")
     canvas.drawRightString(A4[0] - 18 * mm, 5 * mm, f"Page {doc.page}")
     canvas.restoreState()
@@ -126,26 +126,29 @@ def grounded_brief_pdf(brief: dict, investigation_title: str) -> bytes:
     story.append(Paragraph("ANVAYA", styles["DossierSubtitle"]))
     story.append(Paragraph(_safe(brief.get("dossier_title") or "Synthetic Investigation Dossier (DRAFT)"), styles["DossierTitle"]))
     story.append(Paragraph("DRAFT · HUMAN REVIEW REQUIRED · SYNTHETIC DATATHON PROTOTYPE — NOT FOR OPERATIONAL USE", styles["Banner"]))
+    cover_label = ParagraphStyle(name="CoverLabel", parent=styles["Meta"], fontName=_BODY_FONT_BOLD, fontSize=8, textColor=NAVY, spaceAfter=0)
+    cover_value = ParagraphStyle(name="CoverValue", parent=styles["Meta"], fontName=_BODY_FONT, fontSize=8, textColor=NAVY, spaceAfter=0)
     cover_rows = [
-        ["Investigation", _safe(investigation_title)],
-        ["Case ID", _safe(case_id)],
-        ["FIR / Crime / Case No.", f"{_safe(snapshot.get('fir_number'))} / {_safe(snapshot.get('crime_number'))} / {_safe(snapshot.get('case_number'))}"],
-        ["Status", _safe(snapshot.get("status"))],
-        ["Offence", _safe(snapshot.get("offence"))],
-        ["Station / district", f"{_safe(snapshot.get('station'))} / {_safe(snapshot.get('district'))}"],
-        ["Registering officer", _safe(snapshot.get("registering_officer"))],
-        ["Investigating officer (IO)", _safe(snapshot.get("investigating_officer"))],
-        ["Registered at", _safe(snapshot.get("registered_at"))],
-        ["Generated at (UTC)", _safe(generated)],
-        ["Jurisdiction", _safe((brief.get("policy") or {}).get("jurisdiction_state"))],
-        ["Masking", _safe(((brief.get("policy") or {}).get("masking") or {}).get("level"))],
-        ["Selected sources", _safe(", ".join((brief.get("policy") or {}).get("selected_sources") or []) or "None")],
+        [Paragraph("Investigation", cover_label), Paragraph(_safe(investigation_title), cover_value)],
+        [Paragraph("Case ID", cover_label), Paragraph(_safe(case_id), cover_value)],
+        [Paragraph("FIR / Crime / Case No.", cover_label), Paragraph(f"{_safe(snapshot.get('fir_number'))} / {_safe(snapshot.get('crime_number'))} / {_safe(snapshot.get('case_number'))}", cover_value)],
+        [Paragraph("Status", cover_label), Paragraph(_safe(snapshot.get("status")), cover_value)],
+        [Paragraph("Offence", cover_label), Paragraph(_safe(snapshot.get("offence")), cover_value)],
+        [Paragraph("Station / district", cover_label), Paragraph(f"{_safe(snapshot.get('station'))} / {_safe(snapshot.get('district'))}", cover_value)],
+        [Paragraph("Registering officer", cover_label), Paragraph(_safe(snapshot.get("registering_officer")), cover_value)],
+        [Paragraph("Investigating officer (IO)", cover_label), Paragraph(_safe(snapshot.get("investigating_officer")), cover_value)],
+        [Paragraph("Registered at", cover_label), Paragraph(_safe(snapshot.get("registered_at")), cover_value)],
+        [Paragraph("Generated at (UTC)", cover_label), Paragraph(_safe(generated), cover_value)],
+        [Paragraph("Jurisdiction", cover_label), Paragraph(_safe((brief.get("policy") or {}).get("jurisdiction_state")), cover_value)],
+        [Paragraph("Masking", cover_label), Paragraph(_safe(((brief.get("policy") or {}).get("masking") or {}).get("level")), cover_value)],
+        [Paragraph("Selected sources", cover_label), Paragraph(_safe(", ".join((brief.get("policy") or {}).get("selected_sources") or []) or "None"), cover_value)],
     ]
     cover = Table(cover_rows, colWidths=[45 * mm, 125 * mm])
     cover.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, -1), LIGHT),
         ("TEXTCOLOR", (0, 0), (-1, -1), NAVY),
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (0, -1), _BODY_FONT_BOLD),
+        ("FONTNAME", (1, 0), (1, -1), _BODY_FONT),
         ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),

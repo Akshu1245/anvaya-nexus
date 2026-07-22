@@ -187,12 +187,17 @@ export function ConversationExperience(){
   setInv(created);setSelected(created.selected_sources);return created
  }
 
- const redactTurns=(sourceMessages:any[])=>sourceMessages.map(message=>({
-  role:message.role,
-  text:message.text||message.kind||'',
-  kind:message.kind||'text',
-  created_at:new Date().toISOString(),
- }))
+ const redactTurns=(sourceMessages:any[])=>sourceMessages.map(message=>{
+  let text=message.text||''
+  if(!text&&message.kind==='results')text=`Search results: ${(message.results||[]).length} authorised FIR record(s). First: ${(message.results||[])[0]?.case_id||(message.results||[])[0]?.id||'n/a'}.`
+  if(!text&&message.kind==='briefing')text=`Shift briefing: ${message.data?.headline||'loaded'}. Authorised cases: ${message.data?.summary?.authorised_case_count??'n/a'}.`
+  if(!text&&message.kind==='trends')text=`Crime trends loaded. Cases in scope: ${message.data?.summary?.authorised_case_count??'n/a'}.`
+  if(!text&&message.kind==='case')text=`Case 360 opened for ${message.caseId||caseIdOf(message.detail)||'case'}.`
+  if(!text&&message.kind==='answer')text=message.answer?.answer||message.answer?.text||'AI answer (source-bounded).'
+  if(!text&&message.kind==='brief')text=`Grounded brief prepared for ${message.caseId||'case'}.`
+  if(!text)text=message.kind||'message'
+  return {role:message.role,text,kind:message.kind||'text',created_at:new Date().toISOString(),summary:text}
+ })
 
  async function exportConversationPdf(sourceMessages=messages){
   const done=await call('conversation-pdf',async()=>{
@@ -200,7 +205,7 @@ export function ConversationExperience(){
    await m3Api.conversationPdf(investigation.id,redactTurns(sourceMessages))
    return true
   },()=>void exportConversationPdf(sourceMessages))
-  if(done)say({role:'assistant',kind:'text',text:'Conversation PDF export started.'})
+  if(done)say({role:'assistant',kind:'text',text:'Conversation PDF downloaded.'})
  }
 
  async function ask(raw?:string){
@@ -222,8 +227,8 @@ export function ConversationExperience(){
     await openCase(caseRef)
    }else if(resolved.action==='DOWNLOAD_PDF'&&caseRef){
     setActiveCaseId(caseRef);advance('REPORT')
-    const done=await call('brief-pdf',()=>m3Api.briefPdf(investigation.id,caseRef),()=>void ask(text))
-    if(done!==null)say({role:'assistant',kind:'text',text:`Case dossier download started for ${caseRef}. Verify all cited synthetic records before use.`})
+    const data=await call('brief',()=>m3Api.brief(investigation.id,caseRef),()=>void ask(text))
+    if(data)say({role:'assistant',kind:'brief',data,caseId:caseRef})
    }else if(resolved.action==='CONVERSATION_PDF'){
     await exportConversationPdf([...messages,{role:'user',text}])
    }else if(resolved.action==='NETWORK_CLUSTERS'&&caseRef){
@@ -276,7 +281,7 @@ export function ConversationExperience(){
  async function openCase(id:string){
   const investigation=await call('case',()=>ensureInvestigation(),()=>void openCase(id))
   if(!investigation)return
-  const detail=await call('case',()=>m3Api.case360(id,investigation.purpose),()=>void openCase(id))
+  const detail=await call('case',()=>m3Api.case360(id,investigation.purpose,investigation.selected_sources),()=>void openCase(id))
   if(detail){const caseId=caseIdOf(detail)||id;setActiveCaseId(caseId);advance('VERIFY');say({role:'assistant',kind:'case',detail,caseId})}
  }
  async function showRelated(id:string){if(!inv)return;const data=await call('related',()=>m3Api.related(inv.id,id),()=>void showRelated(id));if(data){setActiveCaseId(id);advance('VERIFY');say({role:'assistant',kind:'related',data,baseId:id})}}
@@ -492,7 +497,7 @@ export function ConversationExperience(){
   {helpOpen&&<aside aria-label="ANVAYA help" className="fixed bottom-20 right-5 z-30 w-[min(22rem,calc(100vw-2.5rem))] rounded-2xl border border-blue-200 bg-white p-5 shadow-2xl">
    <div className="flex items-center justify-between"><h3 className="font-semibold text-navy-950">Try these phrases</h3><button type="button" aria-label="Close help" onClick={()=>setHelpOpen(false)}>✕</button></div>
    <ul className="mt-3 space-y-2 text-sm text-slate-700">
-    {['shift briefing','crime trends','complete details','send me PDF','export chat','golden query: unresolved chain snatching near Jayanagar'].map(phrase=><li key={phrase}><button type="button" className="w-full rounded-lg bg-slate-50 px-3 py-2 text-left hover:bg-blue-50" onClick={()=>{setInput(phrase.replace('golden query: ',''));setHelpOpen(false)}}>{phrase}</button></li>)}
+    {['shift briefing','crime trends','complete details','send me PDF','export chat','golden query: unresolved chain snatching near Jayanagar'].map(phrase=><li key={phrase}><button type="button" className="w-full rounded-lg bg-slate-50 px-3 py-2 text-left hover:bg-blue-50" onClick={()=>{const next=phrase.replace('golden query: ','');setHelpOpen(false);void ask(next)}}>{phrase}</button></li>)}
    </ul>
    <button type="button" onClick={startGuidedDemo} className="mt-4 w-full rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800">Start guided demo</button>
    <button type="button" disabled={Boolean(busy)} onClick={()=>{setHelpOpen(false);void exportConversationPdf()}} className="mt-2 w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-bold text-blue-800 hover:bg-blue-50 disabled:opacity-60">Export conversation PDF</button>

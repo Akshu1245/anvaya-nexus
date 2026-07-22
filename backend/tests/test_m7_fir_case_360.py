@@ -63,3 +63,25 @@ def test_case_360_masks_coordinates_outside_assigned_jurisdiction(app):
     assert detail["incident"]["coordinates_masked"] is True
     assert detail["incident"]["latitude"] is None and detail["incident"]["longitude"] is None
     assert all("original_source_value" not in source for source in detail["sources"])
+
+
+def test_case_360_selected_sources_drive_policy_and_assurance(app):
+    repository = app.extensions["repository"]
+    generate(repository, app.config, "test")
+    user = repository.find_user_by_id("SYN-USR-INV")
+    defaulted = case_360(repository, user, "Active Case Investigation", "SYN-CASE-0001", [])
+    assert defaulted["assurance"]["selected_sources"] == ["CCTNS_REPLICA"]
+    assert "witnesses" in defaulted["people"]
+    assert isinstance(defaulted.get("statements"), list)
+    org = defaulted.get("police_and_court") or defaulted.get("organisation")
+    assert org is None or "investigating_officer" in org
+    multi = case_360(
+        repository,
+        user,
+        "Active Case Investigation",
+        "SYN-CASE-0001",
+        ("CCTNS_REPLICA", "FORENSICS_REPLICA"),
+    )
+    assert multi["assurance"]["selected_sources"] == ["CCTNS_REPLICA", "FORENSICS_REPLICA"]
+    assert multi["people"]["witnesses"] is not None
+    assert "statements" in multi

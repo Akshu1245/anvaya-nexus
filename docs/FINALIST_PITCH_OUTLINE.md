@@ -4,7 +4,7 @@ Use the organiser’s official presentation template. Keep the main deck to eigh
 
 ## Slide 1 — ANVAYA NEXUS
 
-Investigator Shift Intelligence: evidence-first conversational crime support for faster, accountable investigation.
+Investigator Shift Intelligence: evidence-first **KSP-style portal** for faster, accountable investigation (form search + chat assist).
 
 Proof points: live AppSail URL, synthetic-only badge, team names, Challenge 01.
 
@@ -16,15 +16,15 @@ Proof points: live AppSail URL, synthetic-only badge, team names, Challenge 01.
 
 ## Slide 3 — The workflow
 
-Shift Board → Ask/confirm → Discover → Verify → Prioritise → Preview/export cited brief.
+Portal Search (filters + confirm) → Discover results → Case 360 drawer → Prioritise (briefing / trends / related) → Preview/export cited dossier PDF. Chat assist opens sections — no infinite scroll dump.
 
-Show one screenshot with the editable interpretation and Shift Intelligence briefing visible.
+Show one screenshot with FIR filters visible and Case 360 drawer or Shift Briefing.
 
 ## Slide 4 — What is genuinely implemented
 
-- English, Kannada, and code-mixed deterministic query interpretation with follow-up context and optional browser voice fallback.
-- Policy-scoped FIR retrieval, Case 360, related cases, graph path, and side-by-side comparison.
-- Shift Intelligence briefing with volume deltas, unusual-volume flags, quality alerts, and MO co-occurrence leads.
+- English + Kannada portal chrome; code-mixed query interpretation; Hindi/voice when Sarvam keys are set.
+- Policy-scoped FIR retrieval, Case 360 drawer, related cases, graph, network clusters, and priorities.
+- Shift Intelligence briefing with volume deltas, unusual-volume flags, quality alerts, and MO co-occurrence leads; descriptive seasonality (not forecasts).
 - Source Passport, Record Assurance, grounded brief preview, native cited PDF, masking, and role/purpose controls.
 
 ## Slide 5 — Why it stands out
@@ -34,6 +34,7 @@ Show one screenshot with the editable interpretation and Shift Intelligence brie
 - Factual relationships and comparison instead of opaque similarity or guilt scores.
 - Daily briefing that answers what changed and what needs review.
 - High-stakes safeguards implemented server-side.
+- Government-portal UX judges can navigate without training.
 
 ## Slide 6 — Architecture and security
 

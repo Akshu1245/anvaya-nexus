@@ -323,7 +323,7 @@ def investigation_conversation_pdf(iid):
  safe_turns=[]
  for turn in turns[:200]:
   if not isinstance(turn,dict):continue
-  safe_turns.append({"role":str(turn.get("role") or "unknown")[:40],"kind":str(turn.get("kind") or "text")[:40],"text":str(turn.get("text") or "")[:4000],"created_at":str(turn.get("created_at") or "")[:64]})
+  safe_turns.append({"role":str(turn.get("role") or "unknown")[:40],"kind":str(turn.get("kind") or "text")[:40],"text":str(turn.get("text") or "")[:4000],"summary":str(turn.get("summary") or "")[:4000],"created_at":str(turn.get("created_at") or "")[:64]})
  audit(repo,"CONVERSATION_PDF_GENERATED","SUCCESS",g.user["id"],g.request_id,{"investigation_id":iid,"turn_count":len(safe_turns)})
  return send_file(BytesIO(conversation_pdf(safe_turns,inv["title"],iid)),mimetype="application/pdf",as_attachment=True,download_name=f"anvaya-conversation-{iid.lower()}.pdf")
 
@@ -369,10 +369,24 @@ def fir_assurance_update(iid,case_id,finding_id):
  audit(repo,"FIR_ASSURANCE_FINDING_ACKNOWLEDGED" if status=="ACKNOWLEDGED" else "FIR_ASSURANCE_FINDING_RESOLVED","SUCCESS",g.user["id"],g.request_id,{"investigation_id":iid,"case_id":case_id,"finding_id":finding_id,"new_status":status})
  return _ok({"id":row["id"],"status":row["status"]})
 
+def _case_360_query_sources():
+ raw=request.args.get("sources") or request.headers.get("X-Anvaya-Sources") or ""
+ return [part.strip() for part in str(raw).split(",") if part.strip()]
+
 @m3_blueprint.get("/cases/<case_id>/360")
 @protected
 def case_review(case_id):
- purpose=request.args.get("purpose");result=case_360(current_app.extensions["repository"],g.user,purpose,case_id);audit(current_app.extensions["repository"],"CASE_360_OPENED","SUCCESS",g.user["id"],g.request_id,{"case_id":case_id,"masking_level":result["overview"]["masking"]["level"]});return _ok(result)
+ purpose=request.args.get("purpose");sources=_case_360_query_sources()
+ result=case_360(current_app.extensions["repository"],g.user,purpose,case_id,sources or None)
+ audit(current_app.extensions["repository"],"CASE_360_OPENED","SUCCESS",g.user["id"],g.request_id,{"case_id":case_id,"masking_level":result["overview"]["masking"]["level"],"selected_sources":result.get("assurance",{}).get("selected_sources")});return _ok(result)
+
+@m3_blueprint.get("/investigations/<iid>/cases/<case_id>/360")
+@protected
+def investigation_case_360(iid,case_id):
+ repo=current_app.extensions["repository"];inv=_owned(repo,iid)
+ sources=_case_360_query_sources() or inv.get("selected_sources") or []
+ result=case_360(repo,g.user,inv["purpose"],case_id,sources)
+ audit(repo,"CASE_360_OPENED","SUCCESS",g.user["id"],g.request_id,{"investigation_id":iid,"case_id":case_id,"masking_level":result["overview"]["masking"]["level"],"selected_sources":result.get("assurance",{}).get("selected_sources")});return _ok(result)
 
 @m3_blueprint.get("/source-passports/<source_record_id>")
 @protected

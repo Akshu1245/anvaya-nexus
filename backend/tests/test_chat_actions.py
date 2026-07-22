@@ -71,6 +71,22 @@ def test_conversation_pdf_renderer_contains_watermark():
     assert len(blob) > 200
 
 
+def test_conversation_pdf_uses_summary_when_text_missing():
+    blob = conversation_pdf(
+        [{"role": "assistant", "summary": "Summary-only turn", "kind": "text", "created_at": "2026-01-01T00:00:00Z"}],
+        "Demo investigation",
+        "SYN-INV-1",
+    )
+    assert blob.startswith(b"%PDF")
+    assert len(blob) > 200
+    text_preferred = conversation_pdf(
+        [{"role": "assistant", "text": "Full text body", "summary": "Should not replace text", "kind": "text"}],
+        "Demo investigation",
+        "SYN-INV-1",
+    )
+    assert text_preferred.startswith(b"%PDF") and len(text_preferred) > 200
+
+
 def test_candidate_clusters_service_uses_related_facts(app):
     repo = app.extensions["repository"]
     generate(repo, app.config, "test")

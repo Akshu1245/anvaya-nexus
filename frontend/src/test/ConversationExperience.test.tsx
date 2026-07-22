@@ -87,5 +87,5 @@ it('opens Case 360 with the investigation purpose',async()=>{
  api.resolveChatAction.mockResolvedValue({kind:'action',action:'OPEN_CASE_360',case_ref:'SYN-CASE-0001'})
  await user.type(screen.getByLabelText('Ask ANVAYA'),'open case SYN-CASE-0001')
  await user.click(screen.getByRole('button',{name:/Send/}))
- await waitFor(()=>expect(api.case360).toHaveBeenCalledWith('SYN-CASE-0001','Active Case Investigation'))
+ await waitFor(()=>expect(api.case360).toHaveBeenCalledWith('SYN-CASE-0001','Active Case Investigation',['CCTNS_REPLICA']))
 })
