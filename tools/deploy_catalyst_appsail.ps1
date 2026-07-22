@@ -151,7 +151,7 @@ try {
         throw "Local health endpoint did not return status=ok."
     }
 
-    $rootResponse = Invoke-WebRequest "http://localhost:8000/"
+    $rootResponse = Invoke-WebRequest "http://localhost:8000/" -UseBasicParsing
     if ($rootResponse.Content -notmatch "ANVAYA") {
         throw "Local frontend root did not contain ANVAYA."
     }
@@ -160,6 +160,7 @@ try {
         "http://localhost:8000/api/auth/public-demo" `
         -Method Post `
         -ContentType "application/json" `
+        -UseBasicParsing `
         -SessionVariable session
 
     if ($demo.Content -notmatch "INVESTIGATOR") {
