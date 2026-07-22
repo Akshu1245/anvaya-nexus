@@ -4,9 +4,9 @@ All values below are owner-provided placeholders. Do not invent any value.
 
 | Evidence | Value |
 | --- | --- |
-| Final Git commit SHA | `TBD_OWNER_RECORDS` |
+| Final Git commit SHA | `1e215ac23220eac6cca212e3259d5f0734d9e3c8` |
 | Final source ZIP SHA-256 | `TBD_OWNER_RECORDS` |
-| Public GitHub URL | `TBD_OWNER_RECORDS` |
+| Public GitHub URL | `https://github.com/Akshu1245/anvaya-nexus` |
 | Live Catalyst URL | `https://appsail-50044124045.development.catalystappsail.in/` |
 | Health-check timestamp (IST) | `TBD_OWNER_AFTER_REDEPLOY — must show status ok, database ok; record ai_assist_enabled / voice_enabled honestly` |
 | Demo-video URL | `TBD_OWNER_RECORDS` |
