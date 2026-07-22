@@ -4,7 +4,7 @@ All values below are owner-provided placeholders. Do not invent any value.
 
 | Evidence | Value |
 | --- | --- |
-| Final Git commit SHA | `aba7e22` (portal ship `1e215ac` + evidence note) |
+| Final Git commit SHA | `a33378f` |
 | Final source ZIP SHA-256 | `TBD_OWNER_RECORDS` |
 | Public GitHub URL | `https://github.com/Akshu1245/anvaya-nexus` |
 | Live Catalyst URL | `https://appsail-50044124045.development.catalystappsail.in/` |
