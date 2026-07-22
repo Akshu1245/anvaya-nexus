@@ -1,3 +1,7 @@
+import shutil
+import tempfile
+from pathlib import Path
+
 import pytest
 
 from backend.anvaya import create_app
@@ -53,10 +57,14 @@ def test_catalyst_readonly_is_development_only_even_with_an_injected_client():
         validate_catalyst_readonly_config({**base, "ENV_NAME": "production"})
 
 
-def test_migrations_are_safe_on_repeated_startup(tmp_path):
-    database = f"sqlite:///{tmp_path / 'repeatable.db'}"
-    first = create_app("development", {"DATABASE_URL": database})
-    first.extensions["repository"].close()
-    second = create_app("development", {"DATABASE_URL": database})
-    assert second.extensions["repository"].connection.execute("SELECT MAX(version) FROM schema_versions").fetchone()[0] == 16
-    second.extensions["repository"].close()
+def test_migrations_are_safe_on_repeated_startup():
+    tmpdir = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+    try:
+        database = f"sqlite:///{Path(tmpdir.name) / 'repeatable.db'}"
+        first = create_app("development", {"DATABASE_URL": database})
+        first.extensions["repository"].close()
+        second = create_app("development", {"DATABASE_URL": database})
+        assert second.extensions["repository"].connection.execute("SELECT MAX(version) FROM schema_versions").fetchone()[0] == 16
+        second.extensions["repository"].close()
+    finally:
+        shutil.rmtree(tmpdir.name, ignore_errors=True)
