@@ -53,12 +53,22 @@ Write-Host "Mode: $(if($DryRun){'Dry run'}elseif($ArchiveOnly){'Archive only'}el
 Require-Command docker
 Require-Command catalyst
 Require-Command npm
-Require-Command python
+
+$pythonCmd = $null
+$venvPython = Join-Path $root ".venv\Scripts\python.exe"
+if (Test-Path $venvPython -PathType Leaf) {
+    $pythonCmd = $venvPython
+} elseif (Get-Command python -ErrorAction SilentlyContinue) {
+    $pythonCmd = (Get-Command python).Source
+} else {
+    throw "Python was not found. Create .venv or install Python before continuing."
+}
+Write-Host "Using Python: $pythonCmd"
 
 & docker --version
 & catalyst --version
 & npm --version
-& python --version
+& $pythonCmd --version
 
 if (
     -not (Test-Path "Dockerfile" -PathType Leaf) -or
@@ -110,7 +120,7 @@ try {
     }
 
     Invoke-Checked "Running backend tests" {
-        python -m pytest backend/tests -q
+        & $pythonCmd -m pytest backend/tests -q
     }
 
     Invoke-Checked "Building Docker image" {
