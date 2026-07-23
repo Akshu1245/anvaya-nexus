@@ -5,19 +5,35 @@ import {btnDanger,btnOutline} from './PortalButtons'
 export type JourneyStage='ASK'|'DISCOVER'|'VERIFY'|'PRIORITISE'|'REPORT'
 export type PortalSection='search'|'briefing'|'trends'|'chat'|'about'|'helplines'|'privacy'|'screen-reader'
 
-const stages:Array<{id:JourneyStage;label:string;description:string}>=[
- {id:'ASK',label:'Ask',description:'Interpret your question'},
- {id:'DISCOVER',label:'Discover',description:'Review returned FIRs'},
- {id:'VERIFY',label:'Verify',description:'Check cited evidence'},
- {id:'PRIORITISE',label:'Prioritise',description:'Plan human review'},
- {id:'REPORT',label:'Report',description:'Create cited brief'},
+const stages:Array<{id:JourneyStage;label:string;description:string;icon:string}>=[
+ {id:'ASK',label:'Ask',description:'Interpret your question',icon:'💬'},
+ {id:'DISCOVER',label:'Discover',description:'Review returned FIRs',icon:'🔎'},
+ {id:'VERIFY',label:'Verify',description:'Check cited evidence',icon:'🛡️'},
+ {id:'PRIORITISE',label:'Prioritise',description:'Plan human review',icon:'🎯'},
+ {id:'REPORT',label:'Report',description:'Create cited brief',icon:'📄'},
 ]
 
 export function JourneyStepper({current,onSelect,maxReached}:{current:JourneyStage;onSelect?:(stage:JourneyStage)=>void;maxReached?:JourneyStage}){
  const order=stages.map(item=>item.id)
  const currentIndex=order.indexOf(current)
  const maxIndex=order.indexOf(maxReached||current)
- return <ol className="grid gap-2 overflow-x-auto pb-1 sm:grid-cols-5" aria-label="Investigation journey">{stages.map((item,index)=>{const state=index<currentIndex?'Complete':index===currentIndex?'Current':index<=maxIndex?'Available':'Locked';const clickable=Boolean(onSelect)&&index<=maxIndex;return <li key={item.id} aria-current={state==='Current'?'step':undefined}><button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`btn-portal w-full min-w-36 rounded-xl border p-3 text-left ${state==='Current'?'border-teal-700 bg-teal-700 text-white':state==='Complete'||state==='Available'?'border-teal-200 bg-teal-50 text-teal-950 hover:bg-teal-100':'border-slate-200 bg-white text-slate-400'}`}><div className="flex justify-between gap-2"><b className="text-xs uppercase tracking-wide">{item.label}</b><span className="text-[10px]">{state}</span></div><p className="mt-1 text-xs">{item.description}</p></button></li>})}</ol>
+ return <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-0" aria-label="Investigation journey">{stages.map((item,index)=>{
+  const state=index<currentIndex?'Complete':index===currentIndex?'Current':index<=maxIndex?'Available':'Locked'
+  const clickable=Boolean(onSelect)&&index<=maxIndex
+  const badge=state==='Complete'?'border-transparent bg-teal-600 text-white':state==='Current'?'border-teal-400 bg-navy-900 text-white ring-2 ring-teal-300 ring-offset-2 ring-offset-white':state==='Available'?'border-teal-300 bg-white text-teal-700':'border-slate-200 bg-white text-slate-300'
+  const pill=state==='Complete'?'bg-teal-50 text-teal-700':state==='Current'?'bg-navy-900 text-teal-100':state==='Available'?'bg-teal-50 text-teal-600':'bg-slate-100 text-slate-400'
+  const glyph=state==='Complete'?'✓':state==='Locked'?'🔒':item.icon
+  return <li key={item.id} aria-current={state==='Current'?'step':undefined} className="relative flex flex-col">
+   {index>0&&<span aria-hidden className={`absolute left-0 top-5 hidden h-0.5 w-full -translate-x-1/2 sm:block ${index<=currentIndex?'bg-teal-500':'bg-slate-200'}`}/>}
+   <button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`btn-portal group flex w-full flex-row items-center gap-3 rounded-xl p-3 text-left sm:flex-col sm:items-center sm:gap-2 sm:text-center ${state==='Locked'?'cursor-not-allowed':''}`}>
+    <span aria-hidden className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-base shadow-sm transition ${badge}`}>{glyph}</span>
+    <span className="flex min-w-0 flex-col sm:items-center">
+     <b className={`text-xs font-semibold uppercase tracking-wide ${state==='Locked'?'text-slate-400':'text-navy-950'}`}>{item.label}</b>
+     <span className={`mt-0.5 text-[11px] leading-tight ${state==='Locked'?'text-slate-300':'text-slate-500'}`}>{item.description}</span>
+     <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${pill}`}>{state}</span>
+    </span>
+   </button>
+  </li>})}</ol>
 }
 
 function KspEmblem(){
@@ -181,12 +197,6 @@ export function ApplicationShell({children,activeSection='search',onNavigate}:Sh
      })}
     </div>
    </nav>
-   <div className="border-t border-slate-200 bg-slate-50">
-    <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-5 py-2 text-sm text-slate-700 sm:px-8">
-     <button type="button" onClick={()=>go('helplines')} className="font-bold uppercase tracking-wide text-navy-900 underline decoration-teal-500 decoration-2 underline-offset-4 hover:text-teal-700">{t('nav.helplines')}</button>
-     {helplineEntries.map(entry=><a key={entry.number} href={`tel:${entry.number}`} className="hover:text-teal-800">{entry.icon} <b className={`text-base ${entry.number==='112'?'text-red-700':''}`}>{entry.number}</b></a>)}
-    </div>
-   </div>
   </header>
 
   <div role="note" className="border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-center text-xs font-bold tracking-[0.12em] text-amber-950 sm:text-sm">{t('prototypeBanner')}</div>

@@ -252,6 +252,7 @@ export function InvestigationPortal({section,onSectionChange}:Props){
  }
 
  const workspaceSection=section==='briefing'||section==='trends'||section==='chat'?section:'search'
+ const queryInvalid=Boolean(error)&&!query.trim()&&!Object.values(filters).some(Boolean)&&!hasArrest&&!hasChargesheet
 
  return <div className="grid gap-5">
   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm">
@@ -275,7 +276,8 @@ export function InvestigationPortal({section,onSectionChange}:Props){
     <h3 className="text-lg font-semibold text-navy-950">{t('searchTitle')}</h3>
     <p className="mt-1 text-sm text-slate-600">{t('searchLead')}</p>
     <label className="mt-4 block text-sm font-medium">{locale==='kn'?'ಪ್ರಶ್ನೆ (ಐಚ್ಛಿಕ)':'Question (optional)'}
-     <textarea aria-label="Investigation question" className="mt-1 min-h-20 w-full rounded-xl border border-slate-200 p-3" value={query} onChange={e=>setQuery(e.target.value)} placeholder={locale==='kn'?'ಉದಾ. ಬಗೆಹರಿಯದ ಸರಗಳ್ಳತನ SYN-STN-01':'e.g. unresolved chain snatching near SYN-STN-01'}/>
+     <textarea aria-label="Investigation question" aria-invalid={queryInvalid||undefined} className={`mt-1 min-h-20 w-full rounded-xl border p-3 transition focus:ring-2 focus:ring-teal-300 ${queryInvalid?'border-red-300 bg-red-50/40':'border-slate-200'}`} value={query} onChange={e=>setQuery(e.target.value)} placeholder={locale==='kn'?'ಉದಾ. ಬಗೆಹರಿಯದ ಸರಗಳ್ಳತನ SYN-STN-01':'e.g. unresolved chain snatching near SYN-STN-01'}/>
+     {queryInvalid&&<span className="mt-1 flex items-center gap-1 text-xs font-normal text-red-700"><span aria-hidden>⚠</span>{locale==='kn'?'ಪ್ರಶ್ನೆ ನಮೂದಿಸಿ ಅಥವಾ ಕೆಳಗಿನ ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಬಳಸಿ.':'Enter a question or set a filter below.'}</span>}
     </label>
     <div className="mt-3 flex flex-wrap gap-2">
      <button type="button" className={btnSecondary} disabled={Boolean(busy)} onClick={()=>void doPreview()}>{busy==='preview'?t('loading'):t('previewQuery')}</button>
@@ -290,12 +292,13 @@ export function InvestigationPortal({section,onSectionChange}:Props){
    <div className="rounded-2xl border bg-white p-5 shadow-sm">
     <h3 className="font-semibold">{t('filtersTitle')}</h3>
     <p className="mt-1 text-xs text-slate-500">{t('purposeLabel')}: {inv?.purpose||defaultPurpose(user.role)}</p>
-    <fieldset className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-     {([['offence','Offence'],['status','Status'],['location','Location / station'],['crime_number','Crime number'],['case_number','Case number'],['date_from','Incident from'],['date_to','Incident to'],['person_name','Person name'],['person_role','Person role'],['act_code','Act code'],['section_code','Section code'],['police_unit','Police unit'],['district','District']] as const).map(([key,label])=>
-      <label key={key} className="text-sm">{label}<input aria-label={label} className="mt-1 w-full rounded border p-2" value={(filters as any)[key]} onChange={e=>setFilters({...filters,[key]:e.target.value})}/></label>
-     )}
-     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={hasArrest} onChange={e=>setHasArrest(e.target.checked)}/> Has arrest / surrender</label>
-     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={hasChargesheet} onChange={e=>setHasChargesheet(e.target.checked)}/> Has chargesheet</label>
+    <fieldset className="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+     {([['offence','Offence'],['status','Status'],['location','Location / station'],['crime_number','Crime number'],['case_number','Case number'],['date_from','Incident from'],['date_to','Incident to'],['person_name','Person name'],['person_role','Person role'],['act_code','Act code'],['section_code','Section code'],['police_unit','Police unit'],['district','District']] as const).map(([key,label])=>{
+      const active=Boolean((filters as any)[key])
+      return <label key={key} className="flex flex-col text-sm"><span className="mb-1 font-medium text-slate-600">{label}</span><input aria-label={label} className={`w-full rounded-lg border p-2 transition focus:ring-2 focus:ring-teal-300 ${active?'border-teal-400 bg-teal-50/40':'border-slate-200'}`} value={(filters as any)[key]} onChange={e=>setFilters({...filters,[key]:e.target.value})}/></label>
+     })}
+     <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm has-[:checked]:border-teal-400 has-[:checked]:bg-teal-50/40"><input type="checkbox" checked={hasArrest} onChange={e=>setHasArrest(e.target.checked)}/> Has arrest / surrender</label>
+     <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm has-[:checked]:border-teal-400 has-[:checked]:bg-teal-50/40"><input type="checkbox" checked={hasChargesheet} onChange={e=>setHasChargesheet(e.target.checked)}/> Has chargesheet</label>
     </fieldset>
     <div className="mt-4">
      <p className="text-sm font-semibold">{t('sourcesLabel')}</p>
@@ -309,8 +312,18 @@ export function InvestigationPortal({section,onSectionChange}:Props){
    {preview&&<QueryInterpretationPanel preview={preview} onChange={setPreview}/>}
 
    <div className="rounded-2xl border bg-white p-5 shadow-sm">
-    <h3 className="font-semibold">{t('resultsTitle')}</h3>
-    {!searched?<p className="mt-2 text-sm text-slate-500">{t('resultsEmpty')}</p>:
+    <div className="flex flex-wrap items-center justify-between gap-2">
+     <h3 className="font-semibold">{t('resultsTitle')}</h3>
+     {searched&&busy!=='search'&&<span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">{results.length} {locale==='kn'?'ದಾಖಲೆಗಳು':results.length===1?'record':'records'}</span>}
+    </div>
+    {busy==='search'?<div className="mt-3 grid gap-3" role="status" aria-live="polite" aria-label={t('loading')}>
+     {[0,1,2].map(i=><div key={i} className="rounded-xl border border-slate-200 p-4">
+      <div className="h-4 w-2/5 rounded bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 bg-[length:200%_100%] animate-shimmer"/>
+      <div className="mt-3 flex gap-2"><div className="h-5 w-24 rounded-full bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 bg-[length:200%_100%] animate-shimmer"/><div className="h-5 w-16 rounded-full bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 bg-[length:200%_100%] animate-shimmer"/></div>
+      <div className="mt-3 h-3 w-3/5 rounded bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 bg-[length:200%_100%] animate-shimmer"/>
+     </div>)}
+    </div>:
+     !searched?<p className="mt-2 text-sm text-slate-500">{t('resultsEmpty')}</p>:
      results.length===0?<p className="mt-2 text-sm text-amber-800">{locale==='kn'?'ಯಾವುದೇ ದಾಖಲೆ ಸಿಗಲಿಲ್ಲ. ಫಿಲ್ಟರ್ ವಿಸ್ತರಿಸಿ ಮತ್ತೆ ಹುಡುಕಿ.':'No authorised records matched. Broaden filters and search again.'}</p>:
      <div className="mt-3 grid gap-3">
       {results.map((item:any)=><article key={item.case_id||item.id} className="rounded-xl border border-slate-200 p-4 transition hover:border-teal-400 hover:shadow-md">
