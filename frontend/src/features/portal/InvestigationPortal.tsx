@@ -331,6 +331,10 @@ export function InvestigationPortal({section,onSectionChange}:Props){
       {!control?.sources?.length&&<label className="rounded border px-2 py-1 text-xs"><input type="checkbox" checked={selected.includes('CCTNS_REPLICA')} onChange={()=>undefined}/> CCTNS_REPLICA</label>}
      </div>
     </div>
+    <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t border-slate-100">
+     <button type="button" className={btnPrimary} disabled={Boolean(busy)} onClick={()=>void runSearch()}>{busy==='search'?t('loading'):t('searchRecords')}</button>
+     <button type="button" className={btnOutline} onClick={()=>{setFilters({...emptyFilters});setHasArrest(false);setHasChargesheet(false);setPreview(null)}}>{t('clear')}</button>
+    </div>
    </div>
 
    {preview&&<QueryInterpretationPanel preview={preview} onChange={setPreview}/>}

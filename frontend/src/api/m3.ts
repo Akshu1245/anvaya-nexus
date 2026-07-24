@@ -4,12 +4,21 @@ export type Investigation={id:string;title:string;purpose:string;selected_source
 export type HealthStatus={status:'ok';service:'anvaya-api';environment:string;database:'ok';public_demo_enabled:boolean;ai_assist_enabled?:boolean;voice_enabled?:boolean}
 type Envelope<T>={data:T;warnings:string[];request_id:string}
 export type ApiError=Error&{retryable?:boolean}
+function requestHeaders(options?:RequestInit){
+ const headers:Record<string,string>={'Content-Type':'application/json',...Object.fromEntries(new Headers(options?.headers).entries())}
+ const method=(options?.method||'GET').toUpperCase()
+ if(!['GET','HEAD','OPTIONS'].includes(method)){
+  const token=document.cookie.split('; ').find(cookie=>cookie.startsWith('ZD_CSRF_TOKEN='))?.split('=',2)[1]
+  if(token)headers['X-ZCSRF-TOKEN']=`zcsrfp=${decodeURIComponent(token)}`
+ }
+ return headers
+}
 async function call<T>(url:string,options?:RequestInit):Promise<T>{
  if(!navigator.onLine)throw new Error('You are offline. FIR data is not stored on this device; reconnect and retry this action manually.')
  const controller=new AbortController()
  const timeout=window.setTimeout(()=>controller.abort(),25_000)
  try{
-  const r=await fetch(url,{credentials:'same-origin',headers:{'Content-Type':'application/json',...(options?.headers||{})},...options,signal:controller.signal})
+  const r=await fetch(url,{...options,credentials:'same-origin',headers:requestHeaders(options),signal:controller.signal})
   const b=await r.json().catch(()=>({}))
   if(!r.ok){
    const error=new Error(b.message||'Request failed.') as ApiError
@@ -29,7 +38,7 @@ async function call<T>(url:string,options?:RequestInit):Promise<T>{
  }
 }
 async function download(url:string,filename:string){const response=await fetch(url,{credentials:'same-origin'});if(!response.ok){const body=await response.json().catch(()=>null);throw new Error(body?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
-async function postDownload(url:string,body:object,filename:string){const response=await fetch(url,{credentials:'same-origin',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!response.ok){const payload=await response.json().catch(()=>null);throw new Error(payload?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
+async function postDownload(url:string,body:object,filename:string){const options={method:'POST',body:JSON.stringify(body)};const response=await fetch(url,{...options,credentials:'same-origin',headers:requestHeaders(options)});if(!response.ok){const payload=await response.json().catch(()=>null);throw new Error(payload?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
 export const m3Api={
  health:()=>call<HealthStatus>('/api/health'),
  login:(username:string,password:string)=>call<User>('/api/auth/login',{method:'POST',body:JSON.stringify({username,password})}),

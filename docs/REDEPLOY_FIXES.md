@@ -19,6 +19,7 @@ This update is for the public synthetic datathon demonstration.
 - Rotated predefined SQLite demo-user password hashes when deployment configuration changes, preventing an existing demo database from retaining stale credentials.
 - Focused and scrolled the authenticated workspace into view after public-demo or private-review login.
 - Increased the portal test's asynchronous public-demo wait so the full parallel frontend suite is stable on slower runners.
+- Moved deployment-suite pytest files to a unique OS temp directory to avoid repository-local Windows cleanup locks.
 
 ## Demonstration values
 

@@ -14,6 +14,7 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $containerName = "anvaya-submission-smoke"
 $archivePath = Join-Path $root $ArchiveName
+$pytestTemp = Join-Path ([IO.Path]::GetTempPath()) ("anvaya-pytest-" + [guid]::NewGuid().ToString("N"))
 
 function Invoke-Checked([string]$Label, [scriptblock]$Command) {
     Write-Host "`n==> $Label" -ForegroundColor Cyan
@@ -104,7 +105,7 @@ if ($DryRun) {
 
 try {
     Invoke-Checked "Installing locked frontend dependencies" {
-        npm --prefix frontend ci
+        npm --prefix frontend ci --include=dev
     }
 
     Invoke-Checked "Running frontend lint" {
@@ -120,7 +121,7 @@ try {
     }
 
     Invoke-Checked "Running backend tests" {
-        & $pythonCmd -m pytest backend/tests -q
+        & $pythonCmd -m pytest backend/tests -q -p no:cacheprovider --basetemp=$pytestTemp
     }
 
     Invoke-Checked "Building Docker image" {
@@ -201,5 +202,18 @@ finally {
     }
     catch {
         Write-Warning "Cleanup warning: $($_.Exception.Message)"
+    }
+    try {
+        $tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+        $resolvedPytestTemp = [IO.Path]::GetFullPath($pytestTemp)
+        if (
+            $resolvedPytestTemp.StartsWith($tempRoot, [StringComparison]::OrdinalIgnoreCase) -and
+            (Test-Path -LiteralPath $resolvedPytestTemp)
+        ) {
+            Remove-Item -LiteralPath $resolvedPytestTemp -Recurse -Force
+        }
+    }
+    catch {
+        Write-Warning "Pytest temp cleanup warning: $($_.Exception.Message)"
     }
 }

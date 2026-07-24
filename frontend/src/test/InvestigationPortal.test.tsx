@@ -57,7 +57,7 @@ it('opens Case 360 with purpose and sources',async()=>{
  await enterDemo(user)
  await user.type(screen.getByLabelText(/Offence/i),'Chain snatching')
  await user.type(screen.getByLabelText(/^Status$/i),'UNRESOLVED')
- await user.click(screen.getByRole('button',{name:/Search records|ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ/i}))
+ await user.click(screen.getAllByRole('button',{name:/Search records|ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ/i})[0])
  expect(await screen.findByText(/SYN-CRIME-00001/)).toBeInTheDocument()
  await user.click(screen.getByRole('button',{name:/Open Case 360|Case 360 ತೆರೆಯಿರಿ/i}))
  await waitFor(()=>expect(api.case360).toHaveBeenCalledWith('SYN-CASE-0001','Active Case Investigation',['CCTNS_REPLICA']))
