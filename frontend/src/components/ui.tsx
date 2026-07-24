@@ -55,13 +55,23 @@ export function scrollToSection(id:string){
  try{el.focus({preventScroll:true})}catch{/* ignore */}
 }
 
+function HelplineIcon({kind}:{kind:string}){
+ const common={width:24,height:24,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor','strokeWidth':1.8,'strokeLinecap':'round' as const,'strokeLinejoin':'round' as const,'aria-hidden':true}
+ if(kind==='emergency')return <svg {...common}><path d="M12 3l9 4.5v5c0 5-3.9 8.5-9 9-5.1-.5-9-4-9-9v-5L12 3z"/><path d="M12 8v5"/><circle cx="12" cy="16" r=".8" fill="currentColor"/></svg>
+ if(kind==='police')return <svg {...common}><path d="M4 10c0-3.5 3.6-6 8-6s8 2.5 8 6v3H4v-3z"/><path d="M4 13h16"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/></svg>
+ if(kind==='women')return <svg {...common}><circle cx="12" cy="8" r="4"/><path d="M12 12v8M9 17h6"/></svg>
+ if(kind==='child')return <svg {...common}><circle cx="12" cy="8" r="4"/><path d="M8 20c0-2.5 1.8-4 4-4s4 1.5 4 4"/><circle cx="10.5" cy="8" r=".6" fill="currentColor"/><circle cx="13.5" cy="8" r=".6" fill="currentColor"/></svg>
+ if(kind==='cyber')return <svg {...common}><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 17v3"/><path d="M8 10l-2 2 2 2M16 10l2 2-2 2M14 9l-4 6"/></svg>
+ if(kind==='traffic')return <svg {...common}><rect x="8" y="3" width="8" height="18" rx="2"/><circle cx="12" cy="7" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="17" r="1.4"/></svg>
+ return null
+}
 const helplineEntries=[
- {icon:'🚨',labelKey:'Emergency Response',labelKn:'ತುರ್ತು ಪ್ರತಿಕ್ರಿಯೆ',number:'112'},
- {icon:'👮',labelKey:'Police Control Room',labelKn:'ಪೊಲೀಸ್ ನಿಯಂತ್ರಣ ಕೊಠಡಿ',number:'100'},
- {icon:'👩',labelKey:'Women Helpline',labelKn:'ಮಹಿಳಾ ಸಹಾಯವಾಣಿ',number:'1091'},
- {icon:'🧒',labelKey:'Child Helpline',labelKn:'ಮಕ್ಕಳ ಸಹಾಯವಾಣಿ',number:'1098'},
- {icon:'💻',labelKey:'Cyber Crime',labelKn:'ಸೈಬರ್ ಅಪರಾಧ',number:'1930'},
- {icon:'🚦',labelKey:'Traffic Helpline',labelKn:'ಸಂಚಾರ ಸಹಾಯವಾಣಿ',number:'103'},
+ {kind:'emergency',labelKey:'Emergency Response',labelKn:'ತುರ್ತು ಪ್ರತಿಕ್ರಿಯೆ',number:'112'},
+ {kind:'police',labelKey:'Police Control Room',labelKn:'ಪೊಲೀಸ್ ನಿಯಂತ್ರಣ ಕೊಠಡಿ',number:'100'},
+ {kind:'women',labelKey:'Women Helpline',labelKn:'ಮಹಿಳಾ ಸಹಾಯವಾಣಿ',number:'1091'},
+ {kind:'child',labelKey:'Child Helpline',labelKn:'ಮಕ್ಕಳ ಸಹಾಯವಾಣಿ',number:'1098'},
+ {kind:'cyber',labelKey:'Cyber Crime',labelKn:'ಸೈಬರ್ ಅಪರಾಧ',number:'1930'},
+ {kind:'traffic',labelKey:'Traffic Helpline',labelKn:'ಸಂಚಾರ ಸಹಾಯವಾಣಿ',number:'103'},
 ]
 
 function AboutAnvayaSection({locale}:{locale:Locale}){
@@ -108,7 +118,7 @@ function HelplinesSection({locale}:{locale:Locale}){
    <p className="mt-1 text-sm text-slate-400">{t('helplinesLead')}</p>
    <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
     {helplineEntries.map(entry=><a key={entry.number} href={`tel:${entry.number}`} className={`${btnDanger} flex-col !h-auto !py-4 text-center`}>
-     <span className="text-2xl" aria-hidden>{entry.icon}</span>
+     <span className="flex items-center justify-center text-white" aria-hidden><HelplineIcon kind={entry.kind}/></span>
      <p className="mt-1 text-3xl font-black leading-none">{entry.number}</p>
      <p className="mt-2 text-sm font-semibold text-red-100">{locale==='kn'?entry.labelKn:entry.labelKey}</p>
     </a>)}
@@ -174,13 +184,13 @@ export function ApplicationShell({children,activeSection='search',onNavigate}:Sh
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್</p>
       <p className="text-xl font-bold leading-tight text-navy-950 sm:text-2xl">Karnataka State Police</p>
       <h1 className="mt-0.5 text-sm font-semibold text-teal-700">{locale==='kn'?'ತನಿಖಾ ಬುದ್ಧಿಮತ್ತೆ ಮಾದರಿ':'Investigation Intelligence Prototype'}</h1>
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{locale==='kn'?'ಕೇಳಿ. ಕಂಡುಹಿಡಿಯಿರಿ. ಪರಿಶೀಲಿಸಿ. ವರದಿ.':'Ask. Discover. Verify. Brief.'}</h2>
+      <h2 className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-400">{locale==='kn'?'ಕೇಳಿ. ಕಂಡುಹಿಡಿಯಿರಿ. ಪರಿಶೀಲಿಸಿ. ವರದಿ.':'Ask. Discover. Verify. Brief.'}</h2>
      </div>
     </div>
     <div className="flex items-center gap-3">
-     <a href="tel:112" className={`${btnDanger} hidden !px-4 !py-2 text-center md:flex md:flex-col`}>
-      <span className="text-[10px] font-bold uppercase tracking-wide">{t('emergency')}</span>
-      <span className="text-2xl font-black leading-none">112</span>
+     <a href="tel:112" aria-label={`${t('emergency')} 112`} className={`${btnDanger} hidden !px-3 !py-1.5 md:inline-flex md:items-center md:gap-2`}>
+      <HelplineIcon kind="emergency"/>
+      <span className="flex flex-col leading-none text-left"><span className="text-[9px] font-bold uppercase tracking-wide opacity-90">{t('emergency')}</span><span className="text-base font-black">112</span></span>
      </a>
      <div className="rounded-xl bg-gradient-to-br from-navy-900 to-teal-900 px-4 py-2 text-white shadow-sm">
       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">ANVAYA</p>
