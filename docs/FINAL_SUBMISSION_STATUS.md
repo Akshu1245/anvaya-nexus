@@ -2,7 +2,7 @@
 
 ## A. Verified locally
 
-- Frontend TypeScript lint, 45-test full suite, focused CSRF/portal regression suite, and production build passed during final verification.
+- Frontend TypeScript lint, 47-test full suite, focused browser regression, and production build passed during final verification.
 - All 379 backend tests passed, including Case 360 sources, public-demo and cited-PDF regressions.
 - The Dockerfile packages the compiled frontend and Flask application together.
 - The source is synthetic-only and declares no live KSP/CCTNS connection, predictive policing, risk scoring, guilt finding, or operational recommendation.
@@ -23,7 +23,8 @@
 - The landing page exposes the password-free **Open public demo** Investigator path when `ANVAYA_PUBLIC_DEMO_MODE=true`.
 - The deployed asset contains the mounted conversation-PDF, contextual follow-up, and Catalyst CSRF fixes.
 - The authenticated live golden path passed: public demo → investigation → preview → one-record FIR search → Case 360 → case dossier PDF (50,491 bytes) → conversation PDF (2,349 bytes).
-- Deployed Docker archive SHA-256: `09281344EC05BE55AAF176A1AC7BDD5EC3A001D4BB9784F557AAC793177FEC4E`.
+- A real Chrome audit also passed briefing, trends, related cases, relationship graph, network clusters, verification priorities, Source Passport, contextual chat, both PDF downloads, Kannada switching, keyboard landmarks, and a 390px mobile viewport with no horizontal overflow.
+- Deployed Docker archive SHA-256: `E852C7B4B3B3970A717EF2AF3202338BE3C5D46C2DAB9C21202D42DBFDE28C83`.
 
 ## D. Requires owner action
 
