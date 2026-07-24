@@ -14,6 +14,11 @@ This update is for the public synthetic datathon demonstration.
 - Added a protected-path test that proves public demo → investigation → query preview → search → Case 360 → native cited PDF works together.
 - Extended the deployment smoke check to verify a built frontend asset is returned as an asset, not JSON.
 - Made the SQLite migration loader explicitly skip two historical superseded duplicate-number drafts. The canonical sequence remains `001` through `016`.
+- Exposed the existing redacted conversation-PDF export in the mounted Investigation Chat.
+- Wired ordinary chat questions to editable query previews and the existing context-aware follow-up endpoint; retrieval still requires an explicit **Search records** confirmation.
+- Rotated predefined SQLite demo-user password hashes when deployment configuration changes, preventing an existing demo database from retaining stale credentials.
+- Focused and scrolled the authenticated workspace into view after public-demo or private-review login.
+- Increased the portal test's asynchronous public-demo wait so the full parallel frontend suite is stable on slower runners.
 
 ## Demonstration values
 

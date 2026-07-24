@@ -42,7 +42,14 @@ class SQLiteRepository(Repository):
     def seed_predefined_users(self, users: Sequence[Mapping[str, Any]]) -> None:
         for user in users:
             self._connection.execute(
-                "INSERT OR IGNORE INTO users VALUES (?,?,?,?,?,?,1)",
+                """INSERT INTO users VALUES (?,?,?,?,?,?,1)
+                   ON CONFLICT(id) DO UPDATE SET
+                     username=excluded.username,
+                     password_hash=excluded.password_hash,
+                     role=excluded.role,
+                     assigned_station=excluded.assigned_station,
+                     assigned_district=excluded.assigned_district,
+                     active=1""",
                 (
                     user["id"], user["username"], user["password_hash"], user["role"],
                     user.get("assigned_station"), user.get("assigned_district"),

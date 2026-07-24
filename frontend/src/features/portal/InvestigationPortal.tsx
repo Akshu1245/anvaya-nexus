@@ -83,6 +83,14 @@ export function InvestigationPortal({section,onSectionChange}:Props){
  const voiceLang=VOICE_BY_LOCALE[locale==='kn'?'kn':'en']
 
  useEffect(()=>{void m3Api.health().then(setHealth).catch(()=>setHealth({status:'ok',service:'anvaya-api',environment:'unknown',database:'ok',public_demo_enabled:false}))},[])
+ useEffect(()=>{
+  if(!user)return
+  requestAnimationFrame(()=>{
+   const workspace=document.getElementById('main-content')
+   workspace?.focus()
+   workspace?.scrollIntoView?.({block:'start'})
+  })
+ },[user?.id])
 
  const advance=(next:JourneyStage)=>{setStage(next);setMaxStage(current=>stageOrder.indexOf(next)>stageOrder.indexOf(current)?next:current)}
  const call=async(label:string,fn:()=>Promise<any>)=>{setBusy(label);setError('');try{return await fn()}catch(e){setError((e as Error).message);return null}finally{setBusy('')}}
@@ -167,6 +175,12 @@ export function InvestigationPortal({section,onSectionChange}:Props){
  async function showPriorities(caseId:string){if(!inv)return;const data=await call('priorities',()=>m3Api.priorities(inv.id,caseId));if(data){setPriorities(data);advance('PRIORITISE')}}
  async function prepareBrief(caseId:string){if(!inv)return;const data=await call('brief',()=>m3Api.brief(inv.id,caseId));if(data){setBrief(data);setBriefOpen(true);advance('REPORT')}}
  async function downloadBriefPdf(){if(!inv||!detail)return;const id=caseIdOf(detail);await call('brief-pdf',()=>m3Api.briefPdf(inv.id,id))}
+ async function downloadConversationPdf(){
+  if(!chatLog.length)return
+  const investigation=await call('conversation-pdf',()=>ensureInvestigation());if(!investigation)return
+  const createdAt=new Date().toISOString()
+  await call('conversation-pdf',()=>m3Api.conversationPdf(investigation.id,chatLog.map(({role,text})=>({role,text,kind:'text',created_at:createdAt}))))
+ }
 
  const openPassport=(id:string)=>void call('passport',()=>m3Api.passport(id,inv?.purpose||defaultPurpose(user?.role))).then(v=>v&&setPassport(v))
 
@@ -218,9 +232,19 @@ export function InvestigationPortal({section,onSectionChange}:Props){
    setChatLog(l=>[...l,{id:Math.random().toString(36).slice(2),role:'assistant',text:'Network clusters loaded in the Case 360 drawer.'}])
    return
   }
+  const investigation=await call('preview',()=>ensureInvestigation());if(!investigation)return
+  const value=await call('preview',()=>preview?.message_id
+   ?m3Api.followUp(investigation.id,preview.message_id,forEngine)
+   :m3Api.preview(investigation.id,forEngine))
   setQuery(forEngine)
   onSectionChange('search')
-  setChatLog(l=>[...l,{id:Math.random().toString(36).slice(2),role:'assistant',text:locale==='kn'?'ಪ್ರಶ್ನೆಯನ್ನು ಹುಡುಕಾಟ ವಿಭಾಗಕ್ಕೆ ಕಳುಹಿಸಲಾಗಿದೆ. “ಪ್ರಶ್ನೆ ಪೂರ್ವವೀಕ್ಷಣೆ” ನಂತರ “ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ” ಕ್ಲಿಕ್ ಮಾಡಿ.':'Sent your question to Search. Click Preview, review filters, then Search records.'}])
+  if(value){
+   setPreview(value);advance('ASK')
+   const inherited=(value.inherited_fields||[]) as string[]
+   setChatLog(l=>[...l,{id:Math.random().toString(36).slice(2),role:'assistant',text:inherited.length
+    ?`Kept ${inherited.join(', ')} from your previous question. Review the editable interpretation, then click Search records.`
+    :locale==='kn'?'ಹುಡುಕಾಟಕ್ಕಾಗಿ ಸಂಪಾದಿಸಬಹುದಾದ ಅರ್ಥವನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗಿದೆ. ಪರಿಶೀಲಿಸಿ, ನಂತರ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ ಕ್ಲಿಕ್ ಮಾಡಿ.':'I prepared an editable interpretation. Review it, then click Search records.'}])
+  }
  }
 
  async function startVoice(){
@@ -355,7 +379,10 @@ export function InvestigationPortal({section,onSectionChange}:Props){
   </section>}
 
   {workspaceSection==='chat'&&<section className="rounded-2xl border bg-white p-5 shadow-sm" aria-label="Chat assist">
-   <h3 className="font-semibold">{t('chatAssist')}</h3>
+   <div className="flex flex-wrap items-center justify-between gap-2">
+    <h3 className="font-semibold">{t('chatAssist')}</h3>
+    <button type="button" className={btnOutline+' !text-xs'} disabled={!chatLog.length||Boolean(busy)} onClick={()=>void downloadConversationPdf()}>{locale==='kn'?'ಸಂಭಾಷಣೆ PDF ಉಳಿಸಿ':'Save conversation PDF'}</button>
+   </div>
    <p className="mt-1 text-sm text-slate-600">{locale==='kn'?'ಚಾಟ್ ವಿಭಾಗಗಳನ್ನು ತೆರೆಯುತ್ತದೆ — Case 360 ಅನ್ನು ಸ್ಕ್ರಾಲ್‌ನಲ್ಲಿ ಹಾಕುವುದಿಲ್ಲ.':'Chat opens portal sections and drawers — it does not dump Case 360 into an endless scroll.'}</p>
    <div className="mt-3 flex flex-wrap gap-2">{chatHelpPhrases.map(phrase=><button key={phrase} type="button" className={btnOutline+' !text-xs'} onClick={()=>void runChat(phrase)}>{phrase}</button>)}</div>
    <div className="mt-4 max-h-64 space-y-2 overflow-y-auto rounded-xl bg-slate-50 p-3">

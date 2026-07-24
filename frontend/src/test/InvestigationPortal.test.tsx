@@ -7,9 +7,9 @@ import {InvestigationPortal} from '../features/portal/InvestigationPortal'
 
 const api=vi.hoisted(()=>({
  health:vi.fn(),publicDemo:vi.fn(),home:vi.fn(),sourceControl:vi.fn(),
- createInvestigation:vi.fn(),preview:vi.fn(),search:vi.fn(),discover:vi.fn(),
+ createInvestigation:vi.fn(),preview:vi.fn(),followUp:vi.fn(),search:vi.fn(),discover:vi.fn(),
  case360:vi.fn(),briefing:vi.fn(),trends:vi.fn(),networkClusters:vi.fn(),
- brief:vi.fn(),briefPdf:vi.fn(),logout:vi.fn(),updateSources:vi.fn(),
+ brief:vi.fn(),briefPdf:vi.fn(),conversationPdf:vi.fn(),logout:vi.fn(),updateSources:vi.fn(),
  related:vi.fn(),firGraph:vi.fn(),priorities:vi.fn(),passport:vi.fn(),
 }))
 vi.mock('../api/m3',()=>({m3Api:api}))
@@ -25,6 +25,9 @@ beforeEach(()=>{
  api.home.mockResolvedValue({})
  api.sourceControl.mockResolvedValue({sources:[{id:'CCTNS_REPLICA',name:'CCTNS',selectable:true,status:'Fresh'}]})
  api.createInvestigation.mockResolvedValue(investigation)
+ api.preview.mockResolvedValue({message_id:'MSG-1',normalised_interpretation:{intent:'SEARCH',filters:{offence:'ROBBERY',status:'UNRESOLVED'},selected_sources:['CCTNS_REPLICA'],result_limit:25}})
+ api.followUp.mockResolvedValue({message_id:'MSG-2',parent_message_id:'MSG-1',normalised_interpretation:{intent:'SEARCH',filters:{offence:'ROBBERY',status:'UNRESOLVED',location:'Jayanagar'},selected_sources:['CCTNS_REPLICA'],result_limit:25},inherited_fields:['offence','status']})
+ api.conversationPdf.mockResolvedValue(undefined)
  api.search.mockResolvedValue({results:[{case_id:'SYN-CASE-0001',crime_number:'SYN-CRIME-00001',status:'UNRESOLVED',offence:'CHAIN_SNATCHING'}]})
  api.case360.mockResolvedValue({case:{id:'SYN-CASE-0001',crime_number:'SYN-CRIME-00001'},overview:{id:'SYN-CASE-0001'},people:{witnesses:[{person_id:'W1',display_name:'Witness A',role:'WITNESS'}],complainants:[],victims:[],accused:[]},statements:[{id:'S1',display_name:'Witness A',statement_text:'Saw the incident.'}],police_and_court:{unit_name:'Unit 1',investigating_officer:{display_name:'IO Demo'}},sections:[{id:'people',label:'People'}],assurance:{summary:{},findings:[]}})
  api.briefing.mockResolvedValue({headline:'Briefing',summary:{authorised_case_count:1},attention:[],quality_alerts:[],network_leads:[],mo_pattern_leads:[],limitations:[],sources:{degraded:[]}})
@@ -38,7 +41,7 @@ function renderPortal(section:'search'|'briefing'|'trends'|'chat'='search'){
 }
 
 async function enterDemo(user:ReturnType<typeof userEvent.setup>){
- await user.click(await screen.findByRole('button',{name:'Open public demo'}))
+ await user.click(await screen.findByRole('button',{name:'Open public demo'},{timeout:5000}))
  await screen.findByRole('heading',{name:/Investigation Portal|ತನಿಖಾ ಪೋರ್ಟಲ್/i})
 }
 
@@ -68,6 +71,29 @@ it('loads trends with seasonality fields',async()=>{
  await user.click(screen.getByRole('button',{name:/Load crime trends|ಪ್ರವೃತ್ತಿಗಳನ್ನು ಲೋಡ್/i}))
  expect(await screen.findByText(/Seasonality/i)).toBeInTheDocument()
  expect(screen.getByText(/Modus operandi co-occurrence/i)).toBeInTheDocument()
+})
+
+it('exports the mounted chat conversation as a PDF',async()=>{
+ const {user}=renderPortal('chat')
+ await enterDemo(user)
+ await user.type(screen.getByLabelText('Ask ANVAYA'),'Find unresolved robbery cases')
+ await user.click(screen.getByRole('button',{name:'Send'}))
+ await user.click(screen.getByRole('button',{name:'Save conversation PDF'}))
+ await waitFor(()=>expect(api.conversationPdf).toHaveBeenCalledWith('INV-1',expect.arrayContaining([
+  expect.objectContaining({role:'user',text:'Find unresolved robbery cases',kind:'text'}),
+ ])))
+})
+
+it('keeps prior query context for a mounted chat follow-up',async()=>{
+ const {user}=renderPortal('chat')
+ await enterDemo(user)
+ await user.type(screen.getByLabelText('Ask ANVAYA'),'Find unresolved robbery cases')
+ await user.click(screen.getByRole('button',{name:'Send'}))
+ expect(await screen.findByText(/prepared an editable interpretation/i)).toBeInTheDocument()
+ await user.type(screen.getByLabelText('Ask ANVAYA'),'Only near Jayanagar')
+ await user.click(screen.getByRole('button',{name:'Send'}))
+ await waitFor(()=>expect(api.followUp).toHaveBeenCalledWith('INV-1','MSG-1','Only near Jayanagar'))
+ expect(await screen.findByText(/Kept offence, status/)).toBeInTheDocument()
 })
 
 it('switches chrome language via locale provider in App',async()=>{
