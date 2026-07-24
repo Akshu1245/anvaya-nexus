@@ -263,11 +263,12 @@ class SQLiteRepository(Repository):
         clauses: list[str] = []
         parameters: list[Any] = []
         if filters.offence:
-            clauses.append("c.offence=?")
-            parameters.append(filters.offence)
+            normalized = filters.offence.upper().replace(" ", "_")
+            clauses.append("(upper(c.offence)=? OR upper(c.offence)=?)")
+            parameters.extend([filters.offence.upper(), normalized])
         if filters.status:
-            clauses.append("c.status=?")
-            parameters.append(filters.status)
+            clauses.append("upper(c.status)=?")
+            parameters.append(filters.status.upper())
         if filters.date_from:
             clauses.append("date(c.incident_at)>=?")
             parameters.append(filters.date_from)

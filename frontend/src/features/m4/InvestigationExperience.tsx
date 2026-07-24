@@ -78,10 +78,18 @@ export function Case360Workspace({detail,onPassport}:{detail:any,onPassport:(id:
 
 export function NetworkClustersPanel({data}:{data:any}){
  const clusters=data?.clusters||[]
+ const methodology=data?.methodology
+ const method=typeof methodology==='string'?methodology:methodology?.method
+ const bounds=methodology&&typeof methodology==='object'
+  ?Object.entries(methodology).filter(([key,value])=>key!=='method'&&key!=='limitations'&&value!==null&&value!==undefined)
+  :[]
+ const limitations=Array.isArray(methodology?.limitations)?methodology.limitations:methodology?.limitations?[methodology.limitations]:[]
  return <section className="rounded-2xl border bg-white p-5" aria-label="Candidate network clusters">
   <p className="text-xs font-bold uppercase tracking-wide text-teal-700">Candidate factual clusters</p>
   <h3 className="mt-1 text-xl font-semibold">Network clusters</h3>
-  <p className="mt-1 text-sm text-slate-600">{data?.methodology||data?.disclaimer||'Connected cases from authorised stored relationship records only. Never identity, guilt or risk.'}</p>
+  <p className="mt-1 text-sm text-slate-600">{method||data?.disclaimer||'Connected cases from authorised stored relationship records only. Never identity, guilt or risk.'}</p>
+  {bounds.length>0&&<dl className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">{bounds.map(([key,value])=><div key={key} className="rounded bg-slate-100 px-2 py-1"><dt className="inline">{key.replaceAll('_',' ')}: </dt><dd className="inline font-semibold">{String(value)}</dd></div>)}</dl>}
+  {limitations.length>0&&<ul className="mt-2 list-disc pl-4 text-xs text-slate-600">{limitations.map((line:any)=><li key={String(line)}>{String(line)}</li>)}</ul>}
   {clusters.length===0?<p className="mt-4 text-sm text-slate-500">No candidate factual clusters were found for this case in the authorised synthetic records.</p>:
    <div className="mt-4 grid gap-3">{clusters.map((cluster:any,index:number)=><article key={cluster.id||index} className="rounded-xl border border-teal-100 bg-teal-50/30 p-4">
     <h4 className="font-semibold">Cluster {(cluster.id||index+1)}</h4>

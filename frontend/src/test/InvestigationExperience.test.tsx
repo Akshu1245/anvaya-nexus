@@ -1,6 +1,6 @@
 import {render,screen,waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {BriefPreviewPanel,Case360Workspace,CaseComparePanel,CrimeTrendsPanel,FirRelationshipGraph,InvestigationExperience,QueryInterpretationPanel,RecordAssurancePanel,RelatedCasesPanel,ShiftBriefingPanel,VerificationPriorityPanel} from '../features/m4/InvestigationExperience'
+import {BriefPreviewPanel,Case360Workspace,CaseComparePanel,CrimeTrendsPanel,FirRelationshipGraph,InvestigationExperience,NetworkClustersPanel,QueryInterpretationPanel,RecordAssurancePanel,RelatedCasesPanel,ShiftBriefingPanel,VerificationPriorityPanel} from '../features/m4/InvestigationExperience'
 
 function mockHealth(publicDemo=true){
   vi.spyOn(globalThis,'fetch').mockImplementation(async()=>new Response(JSON.stringify({request_id:'test',data:{status:'ok',service:'anvaya-api',environment:'testing',database:'ok',public_demo_enabled:publicDemo},warnings:[]}),{status:200}))
@@ -58,6 +58,18 @@ it('renders factual Related Cases reasons without a Case DNA score',()=>{
   expect(screen.getByText('Shared accused: ***masked***')).toBeInTheDocument()
   expect(screen.getByRole('button',{name:'Open Case 360'})).toBeInTheDocument()
   expect(screen.queryByText(/Case DNA|similarity score|risk score/i)).not.toBeInTheDocument()
+})
+
+it('renders structured network-cluster methodology without treating it as a React child',()=>{
+  render(<NetworkClustersPanel data={{
+    methodology:{method:'Bounded factual graph traversal.',limitations:['Candidate links require human verification.'],max_cluster_size:10,max_neighbours:8},
+    clusters:[{id:'CLUSTER-1',member_case_ids:['SYN-CASE-0001','SYN-CASE-0002'],reasons:['Shared recorded identifier']}],
+  }}/>)
+  expect(screen.getByRole('region',{name:'Candidate network clusters'})).toBeInTheDocument()
+  expect(screen.getByText('Bounded factual graph traversal.')).toBeInTheDocument()
+  expect(screen.getByText(/max cluster size:/i)).toBeInTheDocument()
+  expect(screen.getByText('10')).toBeInTheDocument()
+  expect(screen.getByText('Candidate links require human verification.')).toBeInTheDocument()
 })
 
 it('offers case comparison only when the callback is provided',()=>{
