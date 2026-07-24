@@ -20,6 +20,7 @@ This update is for the public synthetic datathon demonstration.
 - Focused and scrolled the authenticated workspace into view after public-demo or private-review login.
 - Increased the portal test's asynchronous public-demo wait so the full parallel frontend suite is stable on slower runners.
 - Moved deployment-suite pytest files to a unique OS temp directory to avoid repository-local Windows cleanup locks.
+- Forwarded Zoho Catalyst's `ZD_CSRF_TOKEN` as the required `X-ZCSRF-TOKEN: zcsrfp=...` header for every mutating portal request, including conversation-PDF export.
 
 ## Demonstration values
 
