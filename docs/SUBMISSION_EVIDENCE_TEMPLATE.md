@@ -4,7 +4,7 @@ All values below are owner-provided placeholders. Do not invent any value.
 
 | Evidence | Value |
 | --- | --- |
-| Final Git commit SHA | `8ac7545` |
+| Deployed application commit SHA | `8ac7545` |
 | Final source ZIP SHA-256 | `TBD_OWNER_RECORDS` |
 | Deployed Docker archive SHA-256 | `09281344EC05BE55AAF176A1AC7BDD5EC3A001D4BB9784F557AAC793177FEC4E` |
 | Public GitHub URL | `https://github.com/Akshu1245/anvaya-nexus` |
