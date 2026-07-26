@@ -76,14 +76,17 @@ export function useVoice(
         }
 
         recognition.onerror = (event: any) => {
-          if (event.error !== 'no-speech') {
-            authStore.setError(`Voice recognition issue: ${event.error || 'error'}. Try typing.`)
+          if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            authStore.setError(`Voice recognition note: ${event.error || 'silence detected'}. Try speaking or typing.`)
           }
-          setRecording(false)
         }
 
         recognition.onend = () => {
-          setRecording(false)
+          if (recognitionRef.current === recognition && mediaRecorderRef.current?.state !== 'recording') {
+            try { recognition.start() } catch { setRecording(false) }
+          } else {
+            setRecording(false)
+          }
         }
 
         recognitionRef.current = recognition

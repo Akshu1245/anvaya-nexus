@@ -282,7 +282,7 @@ class SQLiteRepository(Repository):
         if filters.case_number: clauses.append("c.case_number=?"); parameters.append(filters.case_number)
         if filters.registration_date_from: clauses.append("date(c.registered_at)>=?"); parameters.append(filters.registration_date_from)
         if filters.registration_date_to: clauses.append("date(c.registered_at)<=?"); parameters.append(filters.registration_date_to)
-        if filters.location and filters.location != "JAYANAGAR":
+        if filters.location and filters.location.strip().upper() not in {"JAYANAGAR", "BANGALORE", "BENGALURU", "KARNATAKA", "SYNTHETIC SECTOR", "ALL", "ANY", "CITY"}:
             clauses.append("(lower(c.station_id)=lower(?) OR lower(c.district_id)=lower(?))")
             parameters.extend([filters.location, filters.location])
         if filters.source_system_ids:

@@ -255,9 +255,23 @@ def _compact_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def templated_answer(question: str, records: list[dict[str, Any]], plan: QueryPlan) -> dict[str, Any]:
+    q_norm = (question or "").strip().lower()
+    if not q_norm or any(g in q_norm for g in ("hi", "hello", "hey", "namaste", "namaskara", "who are you", "what can you do", "help")):
+        return {
+            "answer": "Namaskara! I am ANVAYA, the Karnataka State Police AI Copilot powered by Google Gemini 2.5 Flash. I can assist you with FIR searches, Case 360 dossiers, crime trend analytics, and suspect link analysis. How may I assist your investigation today?",
+            "cited_source_ids": [],
+            "engine": "ai_assisted",
+            "grounded": True,
+            "confidence": 1.0,
+            "reasoning": {
+                "title": "Assistant Response",
+                "steps": [{"step": "Greeting acknowledged", "detail": "Assistant greeting rendered"}],
+                "provenance": "ANVAYA KSP AI Copilot",
+            },
+        }
     if not records:
         return {
-            "answer": "I did not find any authorised FIR records for that scope in the selected sources.",
+            "answer": f"I searched the selected sources for '{question or 'your query'}', but no matching FIR records were found. Try broadening the search criteria or searching by crime type (e.g. Chain Snatching, Housebreaking, Vehicle Theft).",
             "cited_source_ids": [],
             "engine": "deterministic",
             "grounded": True,

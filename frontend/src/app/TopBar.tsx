@@ -91,41 +91,40 @@ export function TopBar() {
   }
 
   return (
-    <header className="flex shrink-0 flex-col" role="banner"
+    <header className="relative z-30 flex shrink-0 flex-col overflow-hidden" role="banner"
       style={{ borderBottom: '2px solid #c8a84b', background: 'linear-gradient(180deg, #003087 0%, #00246b 100%)', fontFamily: "'Inter', sans-serif" }}>
 
       {/* Main row */}
-      <div className="flex h-12 items-center justify-between px-4" style={{ borderBottom: '1px solid rgba(200,168,75,0.2)' }}>
+      <div className="flex h-12 items-center justify-between px-3 sm:px-4" style={{ borderBottom: '1px solid rgba(200,168,75,0.2)' }}>
 
         {/* Left: mobile burger + real KSP logo + page title */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 shrink">
           <button onClick={() => setMobileSidebarOpen(true)}
-            className="rounded-lg p-1.5 lg:hidden transition-colors" style={{ color: '#93b8e8' }}
+            className="rounded-lg p-1.5 lg:hidden transition-colors shrink-0" style={{ color: '#93b8e8' }}
             aria-label="Open sidebar">
             <span className="material-icons-outlined" style={{ fontSize: 22 }}>menu</span>
           </button>
 
-          {/* Real KSP logo — hidden on small screens, shown on lg */}
+          {/* Real KSP logo */}
           <img src="/ksp_logo_real.png" alt="Karnataka State Police"
-            className="h-8 w-8 object-contain rounded-full hidden lg:block shrink-0"
+            className="h-7 w-7 object-contain rounded-full hidden sm:block shrink-0"
             style={{ background: '#fff', border: '1.5px solid #c8a84b' }} />
 
-          <div className="hidden md:block min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#c8a84b' }}>
+          <div className="min-w-0">
+            <p className="text-[8px] font-bold uppercase tracking-widest hidden sm:block" style={{ color: '#c8a84b' }}>
               Karnataka State Police
             </p>
-            <div className="flex items-center gap-1.5">
-              <span className="material-icons-outlined" style={{ fontSize: 13, color: '#93b8e8' }}>{pageIcon}</span>
-              <h1 className="text-sm font-semibold text-white truncate" style={{ maxWidth: 280 }}>{title}</h1>
+            <div className="flex items-center gap-1">
+              <span className="material-icons-outlined hidden sm:inline" style={{ fontSize: 13, color: '#93b8e8' }}>{pageIcon}</span>
+              <h1 className="text-xs sm:text-sm font-semibold text-white truncate" style={{ maxWidth: 200 }}>{title}</h1>
             </div>
           </div>
-          <h1 className="text-sm font-semibold text-white truncate md:hidden">{title}</h1>
         </div>
 
         {/* Right: actions */}
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {/* AI Model & Voice Badges */}
-          <div className="hidden lg:flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
+          <div className="hidden xl:flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(200,168,75,0.4)', color: '#fff' }}>
             <span className="flex items-center gap-1 text-[11px] text-amber-300">
               <span className="material-icons-outlined" style={{ fontSize: 13, color: '#60a5fa' }}>auto_awesome</span>

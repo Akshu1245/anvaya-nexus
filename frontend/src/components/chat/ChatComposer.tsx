@@ -61,6 +61,35 @@ export function ChatComposer({
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+        <input
+          type="file"
+          id="chat-file-upload"
+          className="hidden"
+          accept=".pdf,.txt,.csv,.json,.md,.log"
+          onChange={async (e) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            try {
+              const text = await file.text()
+              const cleanText = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '').slice(0, 3000)
+              const prefix = input ? `${input}\n` : ''
+              onInputChange(`${prefix}[File: ${file.name}]\n${cleanText}`)
+            } catch {
+              const prefix = input ? `${input}\n` : ''
+              onInputChange(`${prefix}[Attached File: ${file.name} (${Math.round(file.size / 1024)} KB)]`)
+            }
+            e.target.value = ''
+          }}
+        />
+        <label
+          htmlFor="chat-file-upload"
+          className="flex h-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-slate-300 px-3 text-slate-600 hover:border-teal-500 hover:bg-teal-50"
+          title="Attach document or case file (.pdf, .txt, .json, .csv)"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </label>
         <button
           type="button"
           aria-label={isRecording ? 'Stop recording' : 'Start voice input'}

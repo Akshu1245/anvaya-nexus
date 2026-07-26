@@ -202,11 +202,18 @@ export const useChatStore = create<ChatState>()(
       ),
     })),
   toggleBookmark: (messageId) =>
-    set((state) => ({
-      messages: state.messages.map((m) =>
+    set((state) => {
+      const newMessages = state.messages.map((m) =>
         m.id === messageId ? { ...m, bookmarked: !m.bookmarked } : m
-      ),
-    })),
+      )
+      const updatedSessions = state.sessions.map((s) => ({
+        ...s,
+        messages: (s.messages || []).map((m: any) =>
+          m.id === messageId ? { ...m, bookmarked: !m.bookmarked } : m
+        ),
+      }))
+      return { messages: newMessages, sessions: updatedSessions }
+    }),
   togglePin: (messageId) =>
     set((state) => ({
       messages: state.messages.map((m) =>
@@ -269,9 +276,11 @@ export const useChatStore = create<ChatState>()(
     {
       name: 'anvaya-chat-v2',
       partialize: (state) => ({
+        messages: state.messages,
         sessions: state.sessions,
         folders: state.folders,
         currentSessionId: state.currentSessionId,
+        conversationTitle: state.conversationTitle,
         coachStep: state.coachStep,
       }),
     }
