@@ -127,16 +127,16 @@ export function TopBar() {
           {/* Language Switcher (EN / ಕನ್ನಡ) */}
           <button
             onClick={() => setLocale(locale === 'en' ? 'kn' : 'en')}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all shadow-sm"
             style={{
-              background: locale === 'kn' ? '#c8a84b' : 'rgba(255,255,255,0.1)',
+              background: locale === 'kn' ? '#c8a84b' : 'rgba(255,255,255,0.15)',
               color: locale === 'kn' ? '#003087' : '#ffffff',
-              border: '1px solid rgba(200,168,75,0.4)',
+              border: '1.5px solid #c8a84b',
             }}
-            title="Switch Language / ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸಿ"
+            title="Switch Language (English / ಕನ್ನಡ)"
           >
-            <span className="material-icons-outlined" style={{ fontSize: 14 }}>translate</span>
-            <span>{locale === 'en' ? 'ಕನ್ನಡ' : 'English'}</span>
+            <span className="material-icons-outlined" style={{ fontSize: 15 }}>translate</span>
+            <span>{locale === 'en' ? '🌐 Language: EN (Click for ಕನ್ನಡ)' : '🇮🇳 ಭಾಷೆ: ಕನ್ನಡ (English)'}</span>
           </button>
 
           {/* Bookmarked items button */}
