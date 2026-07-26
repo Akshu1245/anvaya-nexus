@@ -1,0 +1,50 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+.catalystrc
+app-config.json
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+_tmp_pytest*/
+.venv/
+venv/
+.appsail-build/
+vendor/
+
+# Node and frontend outputs
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Local data and generated reports
+*.db
+*.sqlite
+*.sqlite3
+*.tar
+*.tar.gz
+*.log
+*.pdf
+data/generated/
+reports/generated/
+
+# Tooling and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+playwright-report/
+test-results/
+
+.vercel

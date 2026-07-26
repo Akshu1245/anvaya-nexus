@@ -1,0 +1,1 @@
+{"version":"case-dna-v1","bands":[[80,"Strong candidate similarity"],[55,"Moderate candidate similarity"],[0,"Limited candidate similarity"]],"weights":{"hard_device":55,"offence":12,"behaviour":10,"location":8,"vehicle":8,"forensic":7},"penalties":{"vehicle_conflict":12,"missing_provenance":8}}

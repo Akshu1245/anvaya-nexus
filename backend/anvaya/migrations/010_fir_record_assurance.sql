@@ -1,0 +1,14 @@
+ALTER TABLE trust_issues ADD COLUMN rule_code TEXT;
+ALTER TABLE trust_issues ADD COLUMN category TEXT;
+ALTER TABLE trust_issues ADD COLUMN affected_record_type TEXT;
+ALTER TABLE trust_issues ADD COLUMN affected_record_id TEXT;
+ALTER TABLE trust_issues ADD COLUMN affected_field TEXT;
+ALTER TABLE trust_issues ADD COLUMN observed_values_json TEXT;
+ALTER TABLE trust_issues ADD COLUMN deterministic_rule_version TEXT;
+ALTER TABLE trust_issues ADD COLUMN acknowledged_at TEXT;
+ALTER TABLE trust_issues ADD COLUMN resolved_at TEXT;
+ALTER TABLE trust_issues ADD COLUMN resolution_note TEXT;
+ALTER TABLE trust_issues ADD COLUMN updated_at TEXT;
+CREATE INDEX IF NOT EXISTS idx_trust_issues_case_status_severity ON trust_issues(case_id,status,severity);
+CREATE INDEX IF NOT EXISTS idx_trust_issues_rule_code ON trust_issues(rule_code);
+CREATE INDEX IF NOT EXISTS idx_trust_issues_affected_record ON trust_issues(affected_record_type,affected_record_id);

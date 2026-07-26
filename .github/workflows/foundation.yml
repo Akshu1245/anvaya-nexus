@@ -1,0 +1,41 @@
+name: Foundation checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r backend/requirements-dev.txt
+      - run: python -m pytest backend/tests --ignore=backend/tests/test_production_frontend.py
+
+  frontend-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: npm ci
+      - run: npm --prefix frontend ci
+      - run: pip install -r backend/requirements-dev.txt
+      - run: npm --prefix frontend run lint
+      - run: npm --prefix frontend run test -- --run
+      - run: npm --prefix frontend run build
+      - run: python -m pytest backend/tests/test_production_frontend.py

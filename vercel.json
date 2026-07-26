@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm --prefix frontend install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "env": {
+    "ANVAYA_PUBLIC_DEMO_MODE": "true",
+    "ANVAYA_SESSION_SECRET": "anvaya-vercel-demo-secret-2026",
+    "ANVAYA_AI_ASSIST_ENABLED": "false",
+    "ANVAYA_VOICE_ENABLED": "false",
+    "ANVAYA_STORAGE_BACKEND": "sqlite",
+    "ANVAYA_AUTH_BACKEND": "prototype",
+    "ANVAYA_DATABASE_URL": "sqlite:////tmp/anvaya_local.db",
+    "ANVAYA_DEMO_PASSWORD": "ANVAYA-DEMO-ONLY-2026",
+    "ANVAYA_MAX_SEARCH_RESULTS": "25"
+  }
+}
