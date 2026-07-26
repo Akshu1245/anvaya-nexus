@@ -49,7 +49,7 @@ export function TopBar() {
   const sessions = useChatStore((s) => s.sessions)
   const restoreSession = useChatStore((s) => s.restoreSession)
   const toggleBookmark = useChatStore((s) => s.toggleBookmark)
-  const { locale, setLocale } = useLocale()
+  const { locale, setLocale, t } = useLocale()
   const { setMobileSidebarOpen, setCommandPaletteOpen, intelligenceOpen, setIntelligenceOpen } = useUIStore()
   const [bookmarksModalOpen, setBookmarksModalOpen] = useState(false)
 
@@ -71,9 +71,14 @@ export function TopBar() {
   })
 
   const isAIHome = location.pathname === '/app' || location.pathname.startsWith('/app/chat')
-  const title = locale === 'kn'
-    ? (isAIHome ? (messages.length > 0 ? conversationTitle : 'ಎಐ ತನಿಖಾ ಚಾಟ್') : (pageTitlesKn[location.pathname] || 'ಅನ್ವಯ'))
-    : (isAIHome ? (messages.length > 0 ? conversationTitle : 'AI Investigation Chat') : (pageTitles[location.pathname] || 'ANVAYA'))
+  const navKey = location.pathname === '/app/dashboard' ? 'nav.dashboard'
+    : location.pathname === '/app/analytics' ? 'nav.analytics'
+    : location.pathname === '/app/reports' ? 'nav.reports'
+    : location.pathname === '/app/evidence' ? 'nav.evidence'
+    : location.pathname === '/app/supervisor' ? 'nav.supervisor'
+    : location.pathname === '/app/settings' ? 'nav.settings'
+    : 'nav.home'
+  const title = isAIHome ? (messages.length > 0 ? conversationTitle : t('nav.home')) : t(navKey)
   const pageIcon = isAIHome ? 'chat' : (pageIcons[location.pathname] || 'article')
 
   const userInitial = (user?.username || 'O').charAt(0).toUpperCase()

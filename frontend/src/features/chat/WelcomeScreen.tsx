@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { useAuthStore } from '../../stores/authStore'
+import { useLocale } from '../../i18n/portal'
 
 const prompts = [
   {
@@ -44,6 +45,7 @@ type Props = { onPromptClick: (text: string) => void }
 
 export const WelcomeScreen = memo(function WelcomeScreen({ onPromptClick }: Props) {
   const user = useAuthStore((s) => s.user)
+  const { t } = useLocale()
   const firstName = user?.username?.split('.')?.[0] || user?.username || ''
   const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
 
@@ -63,12 +65,10 @@ export const WelcomeScreen = memo(function WelcomeScreen({ onPromptClick }: Prop
 
       {/* Greeting */}
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-        {displayName ? `Good to see you, ${displayName}` : 'Welcome to ANVAYA'}
+        {t('chat.welcomeTitle')}
       </h1>
       <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-sm">
-        AI-powered investigation intelligence for Karnataka State Police.
-        Ask in <span className="font-medium text-slate-700 dark:text-slate-300">English</span>,{' '}
-        <span className="font-medium text-slate-700 dark:text-slate-300">ಕನ್ನಡ</span>, or mixed languages.
+        {t('chat.welcomeSub')}
       </p>
 
       {/* Capability tags */}

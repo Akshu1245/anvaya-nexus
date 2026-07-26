@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect, type DragEvent } from 'react'
 import { FilePreview } from './MessageContent/FilePreview'
+import { useLocale } from '../../i18n/portal'
 
 type Props = {
   input: string
@@ -13,6 +14,7 @@ type Props = {
 }
 
 export function Composer({ input, onInputChange, onSend, onVoiceToggle, isRecording, isBusy, onNewTopic, onFileDrop }: Props) {
+  const { t } = useLocale()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
@@ -199,7 +201,7 @@ export function Composer({ input, onInputChange, onSend, onVoiceToggle, isRecord
           value={input}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isRecording ? 'Listening... Spoken words appear here in real-time...' : 'Ask in English, ಕನ್ನಡ, or हिन्दी...'}
+          placeholder={isRecording ? t('chat.recording') : t('chat.placeholder')}
           rows={1}
           className="max-h-[200px] min-h-[38px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           disabled={isBusy}
