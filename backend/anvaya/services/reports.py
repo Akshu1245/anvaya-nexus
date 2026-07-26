@@ -76,7 +76,7 @@ def _sections(payload):
         values = list(PRIMARY_SECTIONS)
     selected = list(dict.fromkeys(value for value in values if value in SECTIONS))
     if not selected:
-        selected = list(PRIMARY_SECTIONS)
+        raise ApiError("REPORT_SECTIONS_REQUIRED", "At least one valid report section is required.", 400)
     return selected
 
 
