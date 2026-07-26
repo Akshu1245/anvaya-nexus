@@ -52,6 +52,7 @@ type ChatState = {
   activeCaseId: string | null
   isRecording: boolean
   pendingTranscript: string
+  selectedModel: 'google/gemini-2.5-flash' | 'sarvam-multilingual' | 'openrouter-free'
   stage: 'ASK' | 'DISCOVER' | 'VERIFY' | 'PRIORITISE' | 'REPORT'
   maxStage: 'ASK' | 'DISCOVER' | 'VERIFY' | 'PRIORITISE' | 'REPORT'
   helpOpen: boolean
@@ -69,6 +70,7 @@ type ChatState = {
   setActiveCaseId: (id: string | null) => void
   setIsRecording: (recording: boolean) => void
   setPendingTranscript: (text: string) => void
+  setSelectedModel: (model: 'google/gemini-2.5-flash' | 'sarvam-multilingual' | 'openrouter-free') => void
   setStage: (stage: ChatState['stage']) => void
   setMaxStage: (stage: ChatState['maxStage']) => void
   advanceStage: (next: ChatState['stage']) => void
@@ -106,6 +108,7 @@ const initial = {
   activeCaseId: null,
   isRecording: false,
   pendingTranscript: '',
+  selectedModel: 'google/gemini-2.5-flash' as const,
   stage: 'ASK' as ChatState['stage'],
   maxStage: 'REPORT' as ChatState['stage'],
   helpOpen: false,
@@ -152,6 +155,7 @@ export const useChatStore = create<ChatState>()(
   setActiveCaseId: (id) => set({ activeCaseId: id }),
   setIsRecording: (isRecording) => set({ isRecording }),
   setPendingTranscript: (text) => set({ pendingTranscript: text }),
+  setSelectedModel: (selectedModel) => set({ selectedModel }),
   setStage: (stage) => set({ stage }),
   setMaxStage: (maxStage) => set({ maxStage }),
   advanceStage: (next) => {

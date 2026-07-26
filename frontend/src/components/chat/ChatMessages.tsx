@@ -178,20 +178,21 @@ export const ChatMessages = memo(function ChatMessages({
                 <ReasoningPanel reasoning={ai.reasoning} />
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
-                    className="rounded-full border border-slate-300 px-2 py-1 text-xs hover:border-teal-500 hover:bg-teal-50 hover:text-teal-800 disabled:opacity-50"
+                    className="flex items-center gap-1 rounded-full border border-teal-300 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100 disabled:opacity-50"
                     disabled={isBusy}
                     onClick={() => onListen(ai.answer)}
+                    title="Read out text using Sarvam Bulbul v3 TTS"
                   >
-                    Listen
+                    <span>🎙️ Listen (Sarvam TTS)</span>
                   </button>
                   {onToggleBookmark && (
                     <button
-                      className={`rounded-full border px-2 py-1 text-xs disabled:opacity-50 ${
-                        message.bookmarked ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-300 hover:border-amber-500'
+                      className={`rounded-full border px-2.5 py-1 text-xs disabled:opacity-50 ${
+                        message.bookmarked ? 'border-amber-300 bg-amber-50 text-amber-800 font-semibold' : 'border-slate-300 hover:border-amber-500'
                       }`}
                       onClick={() => onToggleBookmark(message.id)}
                     >
-                      {message.bookmarked ? 'Bookmarked' : 'Bookmark'}
+                      {message.bookmarked ? '🔖 Bookmarked' : '🔖 Bookmark'}
                     </button>
                   )}
                 </div>

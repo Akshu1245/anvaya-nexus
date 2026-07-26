@@ -30,16 +30,19 @@ export function Bubble({ children }: { children: ReactNode }) {
 }
 
 export function EngineBadge({ engine }: { engine: string }) {
-  const isAI = engine === 'ai_assisted' || engine === 'ai-assisted'
+  const isGemini = engine.includes('gemini') || engine.includes('google')
+  const isAI = isGemini || engine === 'ai_assisted' || engine === 'ai-assisted'
   return (
     <span
-      className={`animate-scale-in rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        isAI
+      className={`animate-scale-in flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+        isGemini
+          ? 'bg-blue-100 text-blue-900 ring-1 ring-blue-300'
+          : isAI
           ? 'bg-purple-100 text-purple-800 ring-1 ring-purple-200'
           : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
       }`}
     >
-      {isAI ? '✦ AI-assisted' : 'Deterministic'}
+      {isGemini ? '💎 Google Gemini 2.5 Flash' : isAI ? '✦ AI-Assisted' : 'Deterministic'}
     </span>
   )
 }

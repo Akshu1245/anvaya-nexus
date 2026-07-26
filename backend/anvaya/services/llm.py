@@ -41,6 +41,41 @@ def _model_candidates(config: Mapping[str, object]) -> list[str]:
     return ordered[:4]
 
 
+def _gemini_direct_completion(config: Mapping[str, object], messages: list[dict[str, str]], max_tokens: int) -> tuple[str | None, str | None]:
+    gemini_key = str(config.get("GEMINI_API_KEY") or "").strip()
+    if not gemini_key:
+        return None, None
+    model = str(config.get("GEMINI_MODEL") or "gemini-2.5-flash").strip()
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
+    contents = []
+    system_text = ""
+    for msg in messages:
+        role = msg.get("role", "user")
+        text = msg.get("content", "")
+        if role == "system":
+            system_text += text + "\n\n"
+        else:
+            contents.append({"role": "user" if role == "user" else "model", "parts": [{"text": text}]})
+    if system_text and contents:
+        contents[0]["parts"][0]["text"] = f"{system_text}Request:\n{contents[0]['parts'][0]['text']}"
+    payload = json.dumps({
+        "contents": contents or [{"role": "user", "parts": [{"text": system_text}]}],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": max_tokens, "responseMimeType": "application/json"}
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=int(config.get("OPENROUTER_TIMEOUT_SECONDS") or 8)) as response:
+            body = json.loads(response.read().decode("utf-8"))
+            candidates = body.get("candidates", [])
+            if candidates and candidates[0].get("content", {}).get("parts"):
+                text = candidates[0]["content"]["parts"][0].get("text", "")
+                if text and text.strip():
+                    return text.strip(), f"google/{model}"
+    except Exception:
+        pass
+    return None, None
+
+
 def _chat_completion(
     config: Mapping[str, object],
     messages: list[dict[str, str]],
@@ -51,6 +86,14 @@ def _chat_completion(
     if not ai_assist_enabled(config):
         meta["fallback_reason"] = "ai_disabled"
         return None, meta
+
+    # Try direct Google Gemini API if key is present
+    gemini_text, gemini_model = _gemini_direct_completion(config, messages, max_tokens)
+    if gemini_text:
+        meta["model_used"] = gemini_model
+        meta["attempts"] = 1
+        return gemini_text, meta
+
     key = str(config.get("OPENROUTER_API_KEY") or "").strip()
     if not key:
         meta["fallback_reason"] = "missing_key"
@@ -68,7 +111,6 @@ def _chat_completion(
             "temperature": 0.1,
             "response_format": {"type": "json_object"},
         }
-        # Provide OpenRouter model failover array for the primary free router.
         if model == "openrouter/free" and len(candidates) > 1:
             body_payload["models"] = [item for item in candidates[1:] if item != model]
         payload = json.dumps(body_payload).encode("utf-8")
@@ -95,7 +137,6 @@ def _chat_completion(
             last_reason = "empty_content"
         except urllib.error.HTTPError as error:
             last_reason = f"http_{error.code}"
-            # Bounded pause only for rate limits; never burn free quota with long loops.
             if error.code == 429 and index < len(candidates) - 1:
                 time.sleep(0.35)
             continue

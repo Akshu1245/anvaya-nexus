@@ -124,6 +124,20 @@ export function TopBar() {
 
         {/* Right: actions */}
         <div className="flex shrink-0 items-center gap-2">
+          {/* AI Model & Voice Badges */}
+          <div className="hidden lg:flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(200,168,75,0.4)', color: '#fff' }}>
+            <span className="flex items-center gap-1 text-[11px] text-amber-300">
+              <span className="material-icons-outlined" style={{ fontSize: 13, color: '#60a5fa' }}>auto_awesome</span>
+              <span>Gemini 2.5 Flash</span>
+            </span>
+            <span className="text-slate-400">·</span>
+            <span className="flex items-center gap-1 text-[11px] text-teal-300" title="Sarvam Saaras STT, Bulbul TTS, Mayura Translate active">
+              <span className="material-icons-outlined" style={{ fontSize: 13, color: '#2dd4bf' }}>record_voice_over</span>
+              <span>Sarvam AI Suite</span>
+            </span>
+          </div>
+
           {/* Language Switcher (EN / ಕನ್ನಡ) */}
           <button
             onClick={() => setLocale(locale === 'en' ? 'kn' : 'en')}
