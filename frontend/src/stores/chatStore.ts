@@ -107,7 +107,7 @@ const initial = {
   isRecording: false,
   pendingTranscript: '',
   stage: 'ASK' as ChatState['stage'],
-  maxStage: 'ASK' as ChatState['stage'],
+  maxStage: 'REPORT' as ChatState['stage'],
   helpOpen: false,
   coachStep: (() => {
     try {

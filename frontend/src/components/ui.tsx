@@ -28,18 +28,18 @@ export function JourneyStepper({current,onSelect,maxReached}:{current:JourneySta
  const currentIndex=order.indexOf(current)
  const maxIndex=order.indexOf(maxReached||current)
  return <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-0" aria-label="Investigation journey">{stages.map((item,index)=>{
-  const state=index<currentIndex?'Complete':index===currentIndex?'Current':index<=maxIndex?'Available':'Locked'
-  const clickable=Boolean(onSelect)&&index<=maxIndex
-  const badge=state==='Complete'?'border-transparent bg-teal-600 text-white':state==='Current'?'border-teal-400 bg-navy-900 text-white ring-2 ring-teal-300 ring-offset-2 ring-offset-white':state==='Available'?'border-teal-300 bg-white text-teal-700':'border-dashed border-slate-300 bg-white text-slate-300'
-  const pill=state==='Complete'?'bg-teal-50 text-teal-700':state==='Current'?'bg-navy-900 text-teal-100':state==='Available'?'bg-teal-50 text-teal-600':'bg-slate-100 text-slate-400'
-  const glyph=state==='Complete'?'✓':state==='Locked'?'—':<JourneyStageIcon kind={item.id}/>
+  const state=index<currentIndex?'Complete':index===currentIndex?'Current':'Available'
+  const clickable=Boolean(onSelect)
+  const badge=state==='Complete'?'border-transparent bg-teal-600 text-white':state==='Current'?'border-teal-400 bg-navy-900 text-white ring-2 ring-teal-300 ring-offset-2 ring-offset-white':'border-teal-300 bg-white text-teal-700'
+  const pill=state==='Complete'?'bg-teal-50 text-teal-700':state==='Current'?'bg-navy-900 text-teal-100':'bg-teal-50 text-teal-600'
+  const glyph=state==='Complete'?'✓':<JourneyStageIcon kind={item.id}/>
   return <li key={item.id} aria-current={state==='Current'?'step':undefined} className="relative flex flex-col">
    {index>0&&<span aria-hidden className={`absolute left-0 top-5 hidden h-0.5 w-full -translate-x-1/2 sm:block ${index<=currentIndex?'bg-teal-500':'bg-slate-200'}`}/>}
-   <button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`btn-portal group flex w-full flex-row items-center gap-3 rounded-xl p-3 text-left sm:flex-col sm:items-center sm:gap-2 sm:text-center ${state==='Locked'?'cursor-not-allowed':''}`}>
+   <button type="button" disabled={!clickable} onClick={()=>clickable&&onSelect?.(item.id)} className={`btn-portal group flex w-full flex-row items-center gap-3 rounded-xl p-3 text-left sm:flex-col sm:items-center sm:gap-2 sm:text-center`}>
     <span aria-hidden className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-base shadow-sm transition ${badge}`}>{glyph}</span>
     <span className="flex min-w-0 flex-col sm:items-center">
-     <b className={`text-xs font-semibold uppercase tracking-wide ${state==='Locked'?'text-slate-400':'text-navy-950'}`}>{item.label}</b>
-     <span className={`mt-0.5 text-[11px] leading-tight ${state==='Locked'?'text-slate-300':'text-slate-700'}`}>{item.description}</span>
+     <b className="text-xs font-semibold uppercase tracking-wide text-navy-950">{item.label}</b>
+     <span className="mt-0.5 text-[11px] leading-tight text-slate-700">{item.description}</span>
      <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${pill}`}>{state}</span>
     </span>
    </button>
