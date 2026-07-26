@@ -18,7 +18,7 @@ export function MarkdownText({ content, className = '' }: MarkdownTextProps) {
     blocks.push(
       <Tag
         key={`list-${keyPrefix}`}
-        className={`my-2 space-y-1 pl-5 ${currentList.type === 'ul' ? 'list-disc' : 'list-decimal'} text-slate-800 dark:text-slate-200`}
+        className={`my-2 space-y-1 pl-5 ${currentList.type === 'ul' ? 'list-disc' : 'list-decimal'} text-slate-900 dark:text-slate-100 font-medium`}
       >
         {currentList.items.map((item, idx) => (
           <li key={idx} className="leading-relaxed">
@@ -43,17 +43,17 @@ export function MarkdownText({ content, className = '' }: MarkdownTextProps) {
       const raw = match[0]
       if (raw.startsWith('**') && raw.endsWith('**')) {
         parts.push(
-          <strong key={match.index} className="font-semibold text-slate-900 dark:text-slate-100">
+          <strong key={match.index} className="font-bold text-slate-950 dark:text-white">
             {raw.slice(2, -2)}
           </strong>,
         )
       } else if (raw.startsWith('*') && raw.endsWith('*')) {
-        parts.push(<em key={match.index}>{raw.slice(1, -1)}</em>)
+        parts.push(<em key={match.index} className="italic">{raw.slice(1, -1)}</em>)
       } else if (raw.startsWith('`') && raw.endsWith('`')) {
         parts.push(
           <code
             key={match.index}
-            className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-teal-800 dark:bg-slate-800 dark:text-teal-300"
+            className="rounded bg-teal-50 px-1.5 py-0.5 font-mono text-xs font-semibold text-teal-900 border border-teal-200/60 dark:bg-teal-950/60 dark:text-teal-200 dark:border-teal-800/60"
           >
             {raw.slice(1, -1)}
           </code>,
@@ -77,7 +77,7 @@ export function MarkdownText({ content, className = '' }: MarkdownTextProps) {
     if (trimmed.startsWith('### ')) {
       flushList(index)
       blocks.push(
-        <h3 key={index} className="mb-1.5 mt-3 text-base font-bold text-slate-900 dark:text-slate-100">
+        <h3 key={index} className="mb-1.5 mt-3 text-base font-bold text-slate-950 dark:text-white">
           {renderInline(trimmed.slice(4))}
         </h3>,
       )
@@ -86,7 +86,7 @@ export function MarkdownText({ content, className = '' }: MarkdownTextProps) {
     if (trimmed.startsWith('## ')) {
       flushList(index)
       blocks.push(
-        <h2 key={index} className="mb-2 mt-4 text-lg font-bold text-slate-900 dark:text-slate-100">
+        <h2 key={index} className="mb-2 mt-4 text-lg font-bold text-slate-950 dark:text-white">
           {renderInline(trimmed.slice(3))}
         </h2>,
       )
@@ -117,7 +117,7 @@ export function MarkdownText({ content, className = '' }: MarkdownTextProps) {
 
     flushList(index)
     blocks.push(
-      <p key={index} className="mb-1.5 leading-relaxed text-slate-800 dark:text-slate-200">
+      <p key={index} className="mb-2 leading-relaxed text-slate-900 dark:text-slate-100 font-medium">
         {renderInline(trimmed)}
       </p>,
     )

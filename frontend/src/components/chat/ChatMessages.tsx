@@ -162,10 +162,10 @@ export const ChatMessages = memo(function ChatMessages({
           return (
             <Assistant key={message.id}>
               <div
-                className={`animate-scale-in rounded-2xl rounded-tl-sm border px-4 py-3 text-sm leading-relaxed shadow-bubble ${
+                className={`animate-scale-in rounded-2xl rounded-tl-sm border px-4 py-3.5 text-sm leading-relaxed shadow-bubble transition-colors ${
                   ai.engine === 'ai_assisted'
-                    ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-white'
-                    : 'border-slate-200 bg-white'
+                    ? 'border-purple-200/90 bg-gradient-to-br from-purple-50 via-white to-purple-50/50 text-slate-950 dark:border-purple-800/80 dark:bg-gradient-to-br dark:from-[#1b152b] dark:via-[#161424] dark:to-[#12111d] dark:text-slate-100'
+                    : 'border-slate-200 bg-white text-slate-950 dark:border-slate-800 dark:bg-[#161b26] dark:text-slate-100'
                 }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2 mb-1.5">
@@ -178,8 +178,8 @@ export const ChatMessages = memo(function ChatMessages({
                 <MarkdownText content={ai.answer} />
 
                 {message.plan && (
-                  <details className="mt-2.5 rounded-lg border border-slate-200/80 bg-slate-50/60 p-2.5 text-xs text-slate-600">
-                    <summary className="cursor-pointer font-medium hover:text-teal-800">
+                  <details className="mt-2.5 rounded-lg border border-slate-200/90 bg-slate-50 p-2.5 text-xs text-slate-800 dark:border-slate-700/80 dark:bg-slate-800/80 dark:text-slate-200">
+                    <summary className="cursor-pointer font-bold hover:text-teal-700 dark:hover:text-teal-300">
                       🔍 Query Scope: {message.plan.intent} &middot; {Object.entries(message.plan.filters || {}).filter(([,v])=>v).map(([k,v]) => `${k}: ${v}`).join(', ') || 'All records'}
                     </summary>
                   </details>
@@ -187,9 +187,9 @@ export const ChatMessages = memo(function ChatMessages({
 
                 <SourceCitations sources={ai.cited_source_ids || []} onOpenPassport={onOpenPassport} />
                 <ReasoningPanel reasoning={ai.reasoning} />
-                <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-2">
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200/80 pt-2.5 dark:border-slate-800">
                   <button
-                    className="flex items-center gap-1 rounded-full border border-teal-300 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100 disabled:opacity-50"
+                    className="flex items-center gap-1 rounded-full border border-teal-400 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-950 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-950/80 dark:text-teal-100 dark:hover:bg-teal-900 disabled:opacity-50"
                     disabled={isBusy}
                     onClick={() => onListen(ai.answer)}
                     title="Read out text using Sarvam Bulbul v3 TTS"
@@ -198,8 +198,10 @@ export const ChatMessages = memo(function ChatMessages({
                   </button>
                   {onToggleBookmark && (
                     <button
-                      className={`rounded-full border px-2.5 py-1 text-xs disabled:opacity-50 ${
-                        message.bookmarked ? 'border-amber-300 bg-amber-50 text-amber-800 font-semibold' : 'border-slate-300 hover:border-amber-500'
+                      className={`rounded-full border px-2.5 py-1 text-xs font-semibold disabled:opacity-50 ${
+                        message.bookmarked
+                          ? 'border-amber-400 bg-amber-100 text-amber-950 dark:border-amber-700 dark:bg-amber-950/90 dark:text-amber-100'
+                          : 'border-slate-300 bg-slate-50 text-slate-800 hover:border-amber-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                       }`}
                       onClick={() => onToggleBookmark(message.id)}
                     >

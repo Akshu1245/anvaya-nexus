@@ -3,7 +3,7 @@ import { type ReactNode } from 'react'
 export function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex animate-slide-in-right justify-end">
-      <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-gradient-to-br from-teal-600 to-teal-800 px-4 py-2.5 text-sm text-white shadow-bubble">
+      <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-gradient-to-br from-teal-600 to-teal-800 px-4 py-2.5 text-sm font-medium text-white shadow-bubble">
         {text}
       </div>
     </div>
@@ -23,7 +23,7 @@ export function Assistant({ children }: { children: ReactNode }) {
 
 export function Bubble({ children }: { children: ReactNode }) {
   return (
-    <div className="inline-block max-w-full rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-bubble">
+    <div className="inline-block max-w-full rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-900 shadow-bubble dark:border-slate-800 dark:bg-[#161b26] dark:text-slate-100 font-medium">
       {children}
     </div>
   )
@@ -34,12 +34,12 @@ export function EngineBadge({ engine }: { engine: string }) {
   const isAI = isGemini || engine === 'ai_assisted' || engine === 'ai-assisted'
   return (
     <span
-      className={`animate-scale-in flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+      className={`animate-scale-in flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
         isGemini
-          ? 'bg-blue-100 text-blue-900 ring-1 ring-blue-300'
+          ? 'bg-blue-100 text-blue-950 ring-1 ring-blue-300 dark:bg-blue-950/80 dark:text-blue-200 dark:ring-blue-800'
           : isAI
-          ? 'bg-purple-100 text-purple-800 ring-1 ring-purple-200'
-          : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
+          ? 'bg-purple-100 text-purple-950 ring-1 ring-purple-300 dark:bg-purple-950/80 dark:text-purple-200 dark:ring-purple-800'
+          : 'bg-slate-100 text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'
       }`}
     >
       {isGemini ? '💎 Google Gemini 2.5 Flash' : isAI ? '✦ AI-Assisted' : 'Deterministic'}
@@ -51,11 +51,11 @@ export function TypingIndicator() {
   return (
     <Assistant>
       <Bubble>
-        <span className="inline-flex items-center gap-1.5 text-slate-500">
+        <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
           <span className="h-2 w-2 animate-bounce rounded-full bg-teal-500" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-teal-500 [animation-delay:150ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-teal-500 [animation-delay:300ms]" />
-          <span className="ml-1">Working…</span>
+          <span className="ml-1">Thinking…</span>
         </span>
       </Bubble>
     </Assistant>
