@@ -167,3 +167,174 @@ details > summary::-webkit-details-marker {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE — comprehensive overrides so every element is readable
+   The app uses inline style={{ color / background }} extensively,
+   so we apply targeted overrides here rather than editing every file.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Scrollbar ── */
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-color: #0f172a;
+}
+
+/* ── Base surface ── */
+.dark body,
+.dark #root {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* ── White cards → dark surface ── */
+.dark .bg-white { background-color: #1e293b !important; }
+.dark .bg-slate-50 { background-color: #1a2535 !important; }
+.dark .bg-gray-50  { background-color: #1a2535 !important; }
+.dark .bg-slate-100 { background-color: #243044 !important; }
+.dark .bg-gray-100  { background-color: #243044 !important; }
+
+/* ── Text ── */
+.dark .text-slate-900, .dark .text-gray-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800, .dark .text-gray-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700, .dark .text-gray-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600, .dark .text-gray-600 { color: #94a3b8 !important; }
+.dark .text-slate-500, .dark .text-gray-500 { color: #64748b !important; }
+
+/* ── Borders ── */
+.dark .border-slate-200, .dark .border-gray-200 { border-color: #334155 !important; }
+.dark .border-slate-100, .dark .border-gray-100 { border-color: #1e293b !important; }
+
+/* ── Inputs & textareas ── */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #475569 !important; }
+
+/* ── Dashboard stat cards ── */
+.dark [style*="background: #fff"],
+.dark [style*="background:#fff"],
+.dark [style*='background: "white"'],
+.dark [style*="background: white"] {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Rounded white panels ── */
+.dark .rounded-xl.bg-white,
+.dark .rounded-lg.bg-white,
+.dark .rounded-2xl.bg-white {
+  background-color: #1e293b !important;
+}
+
+/* ── Text that uses inline slate colors (override for dark) ── */
+.dark [class*="text-slate-8"],
+.dark [class*="text-slate-9"] {
+  color: #e2e8f0 !important;
+}
+
+/* ── Overflow/panel backgrounds ── */
+.dark .overflow-y-auto,
+.dark .overflow-auto {
+  background-color: #0f172a;
+}
+
+/* ── Feature cards and evidence cards ── */
+.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; }
+
+/* ── Hover states ── */
+.dark .hover\:bg-slate-50:hover { background-color: #243044 !important; }
+.dark .hover\:bg-gray-50:hover  { background-color: #243044 !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #2d3f57 !important; }
+
+/* ── Dividers / hr ── */
+.dark hr, .dark .border-b, .dark .border-t {
+  border-color: #334155;
+}
+
+/* ── Badges / chips ── */
+.dark .bg-amber-50  { background-color: #2d2009 !important; }
+.dark .bg-emerald-50 { background-color: #052e16 !important; }
+.dark .bg-red-50    { background-color: #2d0a0a !important; }
+.dark .bg-blue-50   { background-color: #0d1f38 !important; }
+.dark .bg-purple-50 { background-color: #1e0d33 !important; }
+.dark .bg-orange-50 { background-color: #2d1505 !important; }
+.dark .bg-slate-50  { background-color: #1a2535 !important; }
+.dark .bg-indigo-50 { background-color: #11152e !important; }
+
+/* ── Tables ── */
+.dark table { border-color: #334155 !important; }
+.dark thead th { background-color: #1e293b !important; color: #94a3b8 !important; }
+.dark tbody tr:nth-child(even) { background-color: #1a2535 !important; }
+.dark tbody tr { border-color: #334155 !important; }
+.dark td, .dark th { border-color: #334155 !important; color: #cbd5e1 !important; }
+
+/* ── Modals / dialogs ── */
+.dark [role="dialog"] .bg-white,
+.dark [role="dialog"] .bg-slate-50 {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Status bar / breadcrumb strip (already dark blue, needs text fix) ── */
+.dark header { border-color: #1e3a5f !important; }
+
+/* ── Chat message bubbles ── */
+.dark .chat-message-user   { background-color: #1e3a5f !important; color: #e2e8f0 !important; }
+.dark .chat-message-system { background-color: #1e293b !important; color: #e2e8f0 !important; }
+
+/* ── Loading skeleton ── */
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #243044 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Box shadow cards ── */
+.dark [style*="boxShadow"],
+.dark [style*="box-shadow"] {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+}
+
+/* ── Inline style background overrides (catches hardcoded #f8f9fb etc.) ── */
+.dark [style*="background: #f8f9fb"],
+.dark [style*="background: #f0f4f8"],
+.dark [style*="background: #f1f5f9"],
+.dark [style*="background: rgb(248"],
+.dark [style*="background-color: #f"] {
+  background-color: #0f172a !important;
+}
+
+/* ── Keep KSP navy header and sidebar unchanged in dark mode ── */
+.dark header[style*="#003087"],
+.dark aside[style*="#002060"],
+.dark aside[style*="#001f5c"] {
+  filter: brightness(0.85);
+}
+
+/* ── Ensure all paragraph text inside dark panels is readable ── */
+.dark p, .dark span, .dark label, .dark h1, .dark h2, .dark h3, .dark h4, .dark h5 {
+  color: inherit;
+}
+
+/* ── Force readable text on any element with a light bg in dark mode ── */
+.dark [style*="color: #0f172a"],
+.dark [style*="color: #1e293b"],
+.dark [style*="color: #334155"],
+.dark [style*="color: #475569"],
+.dark [style*="color: #64748b"] {
+  color: #94a3b8 !important;
+}
+.dark [style*="color: #000"],
+.dark [style*="color: rgb(0"] {
+  color: #e2e8f0 !important;
+}
+
+/* stat cards with inline dark text on gold ── keep them as-is */
+.dark [style*="color: #001f5c"] { color: #001f5c !important; }
+.dark [style*="color: #003087"] { color: #93b8e8 !important; }
