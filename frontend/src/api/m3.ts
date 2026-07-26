@@ -37,7 +37,7 @@ async function call<T>(url:string,options?:RequestInit):Promise<T>{
   window.clearTimeout(timeout)
  }
 }
-async function download(url:string,filename:string){const response=await fetch(url,{credentials:'same-origin'});if(!response.ok){const body=await response.json().catch(()=>null);throw new Error(body?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
+async function download(url:string,filename:string){const response=await fetch(url,{credentials:'same-origin',headers:requestHeaders()});if(!response.ok){const body=await response.json().catch(()=>null);throw new Error(body?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
 async function postDownload(url:string,body:object,filename:string){const options={method:'POST',body:JSON.stringify(body)};const response=await fetch(url,{...options,credentials:'same-origin',headers:requestHeaders(options)});if(!response.ok){const payload=await response.json().catch(()=>null);throw new Error(payload?.message||'Unable to generate the document.')}const blob=await response.blob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(link.href)}
 export const m3Api={
  health:()=>call<HealthStatus>('/api/health'),
