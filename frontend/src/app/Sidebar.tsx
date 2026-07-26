@@ -176,7 +176,7 @@ export function Sidebar() {
   const chatStore = useChatStore()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
-  const { locale } = useLocale()
+  const { locale, t } = useLocale()
   const { darkMode, toggleDarkMode } = useUIStore()
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -222,16 +222,16 @@ export function Sidebar() {
     : recent
   const groups = groupSessions(filtered)
 
-  // Nav sections with bilingual labels
+  // Nav sections with dynamic t(...) localization
   const mainNav = [
-    { id: 'home', path: '/app', label: locale === 'kn' ? 'ಎಐ ಚಾಟ್' : 'AI Chat', icon: ICN.home },
-    { id: 'dashboard', path: '/app/dashboard', label: locale === 'kn' ? 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್' : 'Dashboard', icon: ICN.dashboard },
-    { id: 'analytics', path: '/app/analytics', label: locale === 'kn' ? 'ವಿಶ್ಲೇಷಣೆ' : 'Analytics', icon: ICN.analytics },
-    { id: 'reports', path: '/app/reports', label: locale === 'kn' ? 'ವರದಿಗಳು' : 'Reports', icon: ICN.reports },
-    { id: 'evidence', path: '/app/evidence', label: locale === 'kn' ? 'ಸಾಕ್ಷ್ಯ' : 'Evidence', icon: ICN.evidence },
+    { id: 'home', path: '/app', label: t('nav.home'), icon: ICN.home },
+    { id: 'dashboard', path: '/app/dashboard', label: t('nav.dashboard'), icon: ICN.dashboard },
+    { id: 'analytics', path: '/app/analytics', label: t('nav.analytics'), icon: ICN.analytics },
+    { id: 'reports', path: '/app/reports', label: t('nav.reports'), icon: ICN.reports },
+    { id: 'evidence', path: '/app/evidence', label: t('nav.evidence'), icon: ICN.evidence },
   ]
   const supervisorNav = user?.role === 'SUPERVISOR'
-    ? [{ id: 'supervisor', path: '/app/supervisor', label: locale === 'kn' ? 'ಮೇಲ್ವಿಚಾರಕ' : 'Supervisor', icon: ICN.supervisor }]
+    ? [{ id: 'supervisor', path: '/app/supervisor', label: t('nav.supervisor'), icon: ICN.supervisor }]
     : []
 
   const userInitial = (user?.username || 'U').charAt(0).toUpperCase()
@@ -247,7 +247,7 @@ export function Sidebar() {
           <img src="/ksp_logo_real.png" alt="KSP" className="h-9 w-9 object-contain rounded-full shrink-0"
             style={{ border: '1px solid #c8a84b', background: '#fff' }} />
           <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#c8a84b' }}>Karnataka Police</p>
+            <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#c8a84b' }}>{t('ksp.title')}</p>
             <p className="text-xs font-bold text-white truncate">ANVAYA NEXUS</p>
           </div>
         </button>
@@ -255,8 +255,8 @@ export function Sidebar() {
           onClick={handleNewChat}
           className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors shrink-0"
           style={{ color: '#c8a84b', background: 'rgba(200,168,75,0.1)', border: '1px solid rgba(200,168,75,0.2)' }}
-          title="New Chat (Ctrl+N)"
-          aria-label="New Chat"
+          title={t('nav.newChat')}
+          aria-label={t('nav.newChat')}
         >
           {ICN.plus}
         </button>
@@ -294,7 +294,7 @@ export function Sidebar() {
             type="search"
             value={chatStore.sessionSearch}
             onChange={(e) => chatStore.setSessionSearch(e.target.value)}
-            placeholder="Search conversations..."
+            placeholder={t('nav.searchConvs')}
             className="w-full rounded-lg py-1.5 pl-8 pr-3 text-xs outline-none"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(200,168,75,0.15)', color: '#93b8e8' }}
           />

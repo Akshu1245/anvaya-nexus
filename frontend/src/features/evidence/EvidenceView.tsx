@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
+import { useLocale } from '../../i18n/portal'
 
 type EvidenceItem = {
   id: string
@@ -38,6 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 export function EvidenceView() {
   const user = useAuthStore((s) => s.user)
+  const { t } = useLocale()
   const [filter, setFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
@@ -67,14 +69,11 @@ export function EvidenceView() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="material-icons-outlined" style={{ fontSize: 22, color: '#003087' }}>inventory_2</span>
-              <h2 className="text-xl font-bold text-slate-900">Evidence Repository</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('evidence.title')}</h2>
             </div>
-            <p className="text-sm text-slate-500">
-              Manage and track physical, digital, and forensic evidence across investigations.
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {t('evidence.subtitle')}
               {user?.assigned_station ? ` · ${user.assigned_station}` : ''}
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8', fontFamily: "'Noto Sans Kannada', sans-serif" }}>
-              ಸಾಕ್ಷ್ಯ ಭಂಡಾರ — ಸಿಂಥೆಟಿಕ್ ಡೇಟಾ ಮಾತ್ರ
             </p>
           </div>
           <div className="flex items-center gap-2">

@@ -2,18 +2,19 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { m3Api } from '../../api/m3'
 import { Link } from 'react-router-dom'
+import { useLocale } from '../../i18n/portal'
 
 function StatCard({ label, value, sub, icon, color, bg }: {
   label: string; value: string | number; sub?: string; icon: string; color: string; bg: string
 }) {
   return (
-    <div className="rounded-xl bg-white p-5 shadow-sm transition-all"
+    <div className="rounded-xl bg-white p-5 shadow-sm transition-all dark:bg-slate-800 dark:border-slate-700"
       style={{ border: '1px solid #e2e8f0' }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,48,135,0.1)')}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '')}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
           <p className="mt-2 text-3xl font-bold" style={{ color }}>{value}</p>
           {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
         </div>
@@ -27,6 +28,7 @@ function StatCard({ label, value, sub, icon, color, bg }: {
 
 export function DashboardView() {
   const user = useAuthStore((s) => s.user)
+  const { t } = useLocale()
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -56,17 +58,16 @@ export function DashboardView() {
         {/* Header */}
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span className="material-icons-outlined" style={{ color: '#003087', fontSize: 24 }}>dashboard</span>
-              Investigation Dashboard
+              {t('dash.title')}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Welcome back, <span className="font-semibold" style={{ color: '#003087' }}>{displayName}</span>
-              {user?.assigned_station ? ` · ${user.assigned_station}` : ''}
-              {user?.assigned_district ? `, ${user.assigned_district}` : ''}
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {t('dash.subtitle')}
             </p>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8', fontFamily: "'Noto Sans Kannada', sans-serif" }}>
-              ತನಿಖಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ಸಿಂಥೆಟಿಕ್ ಡೇಟಾ
+            <p className="mt-0.5 text-xs text-slate-400">
+              Welcome back, <span className="font-semibold text-blue-700 dark:text-blue-400">{displayName}</span>
+              {user?.assigned_station ? ` · ${user.assigned_station}` : ''}
             </p>
           </div>
           <button onClick={() => void load()}
@@ -96,10 +97,10 @@ export function DashboardView() {
           <>
             {/* Stats */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard label="Total FIRs" value={stats?.total_firs ?? '—'} sub="in database" icon="folder_open" color="#003087" bg="#eff4ff" />
-              <StatCard label="Pending" value={stats?.pending ?? '—'} sub="awaiting resolution" icon="pending" color="#d97706" bg="#fffbeb" />
-              <StatCard label="Resolved" value={stats?.resolved ?? '—'} sub="closed / charge-sheeted" icon="check_circle" color="#059669" bg="#ecfdf5" />
-              <StatCard label="Priority" value={stats?.priority ?? '—'} sub="high / critical severity" icon="priority_high" color="#dc2626" bg="#fef2f2" />
+              <StatCard label={t('dash.totalFirs')} value={stats?.total_firs ?? '—'} sub="in database" icon="folder_open" color="#003087" bg="#eff4ff" />
+              <StatCard label={t('dash.pendingCases')} value={stats?.pending ?? '—'} sub="awaiting resolution" icon="pending" color="#d97706" bg="#fffbeb" />
+              <StatCard label={t('dash.resolvedCases')} value={stats?.resolved ?? '—'} sub="closed / charge-sheeted" icon="check_circle" color="#059669" bg="#ecfdf5" />
+              <StatCard label={t('dash.priorityAlerts')} value={stats?.priority ?? '—'} sub="high / critical severity" icon="priority_high" color="#dc2626" bg="#fef2f2" />
             </div>
 
             {/* Quick actions */}

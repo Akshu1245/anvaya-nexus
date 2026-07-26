@@ -67,12 +67,16 @@ def render(repo, report, sections, notes, user):
 
 
 def _sections(payload):
-    values = payload.get("sections", PRIMARY_SECTIONS)
-    if not isinstance(values, list):
-        raise ApiError("REPORT_SECTIONS_INVALID", "Report sections must be a list.", 400)
+    values = payload.get("sections")
+    if values is None:
+        values = list(PRIMARY_SECTIONS)
+    elif isinstance(values, (list, tuple)):
+        values = list(values)
+    else:
+        values = list(PRIMARY_SECTIONS)
     selected = list(dict.fromkeys(value for value in values if value in SECTIONS))
     if not selected:
-        raise ApiError("REPORT_SECTIONS_REQUIRED", "Select at least one report section.", 400)
+        selected = list(PRIMARY_SECTIONS)
     return selected
 
 
