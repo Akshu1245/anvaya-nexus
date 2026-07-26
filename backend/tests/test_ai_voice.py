@@ -35,20 +35,29 @@ def _login_and_create(client):
 
 # ── Config / flags ─────────────────────────────────────────────────────────────
 
-def test_flags_off_by_default(client):
-    data = client.get("/api/health").json["data"]
-    assert data["ai_assist_enabled"] is False
-    assert data["voice_enabled"] is False
+def test_flags_off_by_default(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("SARVAM_API_KEY", raising=False)
+    monkeypatch.delenv("AI_ASSIST_ENABLED", raising=False)
+    monkeypatch.delenv("VOICE_ENABLED", raising=False)
+    app = create_app("testing", {"AI_ASSIST_ENABLED": False, "VOICE_ENABLED": False, "OPENROUTER_API_KEY": "", "SARVAM_API_KEY": ""})
+    with app.test_client() as c:
+        data = c.get("/api/health").json["data"]
+        assert data["ai_assist_enabled"] is False
+        assert data["voice_enabled"] is False
+    app.extensions["repository"].close()
 
 
-def test_ai_flag_requires_both_flag_and_key():
+def test_ai_flag_requires_both_flag_and_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     app_no_key = create_app("testing", {"AI_ASSIST_ENABLED": True, "OPENROUTER_API_KEY": ""})
     with app_no_key.test_client() as c:
         assert c.get("/api/health").json["data"]["ai_assist_enabled"] is False
     app_no_key.extensions["repository"].close()
 
 
-def test_voice_flag_requires_both_flag_and_key():
+def test_voice_flag_requires_both_flag_and_key(monkeypatch):
+    monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     app_no_key = create_app("testing", {"VOICE_ENABLED": True, "SARVAM_API_KEY": ""})
     with app_no_key.test_client() as c:
         assert c.get("/api/health").json["data"]["voice_enabled"] is False

@@ -73,7 +73,7 @@ def ai_assist_enabled(config: Mapping[str, object]) -> bool:
 
 
 def voice_enabled(config: Mapping[str, object]) -> bool:
-    return bool(config.get("VOICE_ENABLED")) or bool(str(config.get("SARVAM_API_KEY") or "").strip())
+    return bool(config.get("VOICE_ENABLED")) and bool(str(config.get("SARVAM_API_KEY") or "").strip())
 
 
 class DevelopmentConfig(Config):
