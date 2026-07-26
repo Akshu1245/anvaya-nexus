@@ -1,0 +1,6 @@
+{
+  "manifest_version": "M2-1.0",
+  "synthetic_only": true,
+  "notice": "Ground truth is test-only and is not exposed through normal application APIs.",
+  "story_ids": ["STORY-HARD-ID", "STORY-MO-ONLY", "STORY-VEHICLE-CONFLICT", "STORY-DUPLICATE", "STORY-CHRONOLOGY", "STORY-CANDIDATE"]
+}

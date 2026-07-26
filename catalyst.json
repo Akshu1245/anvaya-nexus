@@ -1,0 +1,8 @@
+{
+  "appsail": [
+    {
+      "source": "docker-archive://anvaya-nexus-submission.tar",
+      "name": "AppSail"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Vehicle theft case illustration">
+  <defs>
+    <linearGradient id="vtBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eef8f4"/>
+      <stop offset="100%" stop-color="#d7ebe3"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="120" rx="16" fill="url(#vtBg)"/>
+  <path d="M34 74h78c8 0 14 4 16 10v8H30v-8c0-6 2-10 4-10z" fill="#17324d"/>
+  <path d="M48 74l10-16h28l12 16" fill="#1f8a8a"/>
+  <circle cx="52" cy="92" r="9" fill="#fff" stroke="#0d1b2a" stroke-width="3"/>
+  <circle cx="108" cy="92" r="9" fill="#fff" stroke="#0d1b2a" stroke-width="3"/>
+  <path d="M120 48h18M129 39v18" stroke="#c9a227" stroke-width="4" stroke-linecap="round"/>
+  <rect x="118" y="34" width="22" height="28" rx="4" fill="none" stroke="#c9a227" stroke-width="2.5"/>
+</svg>
