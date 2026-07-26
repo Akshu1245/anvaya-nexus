@@ -245,10 +245,10 @@ def confirm(iid,mid):
 def execute_search(iid):
  repo=current_app.extensions["repository"];inv=_owned(repo,iid)
  plan=_validated_plan(request.get_json(silent=True) or {})
- action_type = "DISCOVER" if plan.intent == "DISCOVER" else "SEARCH"
- decision=evaluate(g.user,inv["purpose"],plan.selected_sources,action_type,plan.result_limit)
+ if plan.intent!="SEARCH":raise ApiError("INTENT_NOT_AVAILABLE",f"{plan.intent} execution is not available until a later milestone.",409,False)
+ decision=evaluate(g.user,inv["purpose"],plan.selected_sources,"SEARCH",plan.result_limit)
  if not decision.allowed:audit(repo,"PERMISSION_DENIAL","DENIED",g.user["id"],g.request_id,decision.dict());raise ApiError(decision.denial_code,decision.explanation,403,False)
- results=discover(repo,g.user,inv["purpose"],plan) if plan.intent=="DISCOVER" else search_cases(repo,g.user,inv["purpose"],plan);metadata={"investigation_id":iid,"filter_categories":[key for key,value in plan.filters.model_dump().items() if value is not None],"selected_sources":plan.selected_sources,"result_count":len(results)};audit(repo,"FIR_SEARCH_EXECUTED","SUCCESS",g.user["id"],g.request_id,metadata);audit(repo,"SEARCH_EXECUTION","SUCCESS",g.user["id"],g.request_id,metadata)
+ results=search_cases(repo,g.user,inv["purpose"],plan);metadata={"investigation_id":iid,"filter_categories":[key for key,value in plan.filters.model_dump().items() if value is not None],"selected_sources":plan.selected_sources,"result_count":len(results)};audit(repo,"FIR_SEARCH_EXECUTED","SUCCESS",g.user["id"],g.request_id,metadata);audit(repo,"SEARCH_EXECUTION","SUCCESS",g.user["id"],g.request_id,metadata)
  states={s["id"]:s["status"] for s in list_sources(repo) if s["id"] in plan.selected_sources};warnings=[f"{sid} is {state}" for sid,state in states.items() if state!="Fresh"]
  return _ok({"results":results,"result_count":len(results),"source_states":states,"policy":decision.dict()},warnings)
 
@@ -268,8 +268,7 @@ def grounded_answer(iid):
   if not decision.allowed:raise ApiError(decision.denial_code,decision.explanation,403)
   results=discover(repo,g.user,inv["purpose"],plan)
  else:
-  action_type = "SEARCH"
-  decision=evaluate(g.user,inv["purpose"],plan.selected_sources,action_type,plan.result_limit)
+  decision=evaluate(g.user,inv["purpose"],plan.selected_sources,"SEARCH",plan.result_limit)
   if not decision.allowed:raise ApiError(decision.denial_code,decision.explanation,403)
   results=search_cases(repo,g.user,inv["purpose"],plan)
  answer_payload=llm_answer(question,results,plan,current_app.config) or templated_answer(question or "Investigation query",results,plan)
