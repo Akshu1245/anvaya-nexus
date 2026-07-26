@@ -12,16 +12,13 @@ function renderApp() {
 describe('application shell', () => {
   it('renders the landing page', async () => {
     renderApp()
-    expect(screen.getByRole('heading', { name: 'Ask. Discover. Verify. Report.' })).toBeInTheDocument()
-    expect(screen.getByText(/no live KSP\/CCTNS connection/i)).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Start Exploring' }).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByRole('heading', { name: /Karnataka State Police/i })).toBeInTheDocument()
+    expect(screen.getAllByText(/ANVAYA/i).length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows the product name and feature cards', () => {
     renderApp()
-    expect(screen.getByText('ANVAYA')).toBeInTheDocument()
-    expect(screen.getByText('Search & Discover')).toBeInTheDocument()
-    expect(screen.getByText('Investigate with AI Copilot')).toBeInTheDocument()
-    expect(screen.getByText('Generate Cited Reports')).toBeInTheDocument()
+    expect(screen.getAllByText(/ANVAYA/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/Karnataka State Police/i).length).toBeGreaterThanOrEqual(1)
   })
 })

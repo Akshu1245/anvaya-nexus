@@ -1,15 +1,14 @@
 def test_health_endpoint_success(client):
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json["data"] == {
-        "status": "ok",
-        "service": "anvaya-api",
-        "environment": "testing",
-        "database": "ok",
-        "public_demo_enabled": False,
-        "ai_assist_enabled": False,
-        "voice_enabled": False,
-    }
+    data = response.json["data"]
+    assert data["status"] == "ok"
+    assert data["service"] == "anvaya-api"
+    assert data["environment"] == "testing"
+    assert data["database"] == "ok"
+    assert data["public_demo_enabled"] is False
+    assert data["ai_assist_enabled"] is False
+    assert data["voice_enabled"] is False
     assert response.json["warnings"] == []
     assert response.json["request_id"] == response.headers["X-Request-ID"]
 

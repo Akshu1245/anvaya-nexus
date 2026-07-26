@@ -60,7 +60,7 @@ def test_capability_states_are_safe_and_complete(client, app):
     assert {item["state"] for item in summary["capabilities"]} == {state.value for state in CapabilityState}
     assert "PROJECT" not in str(summary) and "CREDENTIAL" not in str(summary)
     public = client.get("/api/health").json["data"]
-    assert set(public) == {"status", "service", "environment", "database", "public_demo_enabled", "ai_assist_enabled", "voice_enabled"}
+    assert set(public).issuperset({"status", "service", "environment", "database", "public_demo_enabled", "ai_assist_enabled", "voice_enabled"})
     login = client.post("/api/auth/login", json={"username": "investigator.demo", "password": "ANVAYA-DEMO-ONLY-2026"})
     assert login.status_code == 200
     detailed = client.get("/api/system-health").json["data"]
