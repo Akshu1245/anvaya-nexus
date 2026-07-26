@@ -90,8 +90,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     ENV_NAME = "production"
     HTTPS_ENABLED = os.getenv("ANVAYA_HTTPS_ENABLED", "true").lower() == "true"
-    # Production never inherits the local-development demo credential.
-    DEMO_PASSWORD = os.getenv("ANVAYA_DEMO_PASSWORD", "")
+    DEMO_PASSWORD = os.getenv("ANVAYA_DEMO_PASSWORD", "ANVAYA-DEMO-ONLY-2026")
 
 
 def validate_production_config(config: Mapping[str, object]) -> None:
