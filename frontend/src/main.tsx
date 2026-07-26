@@ -5,8 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { App } from './App'
 import './styles.css'
 
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => { void navigator.serviceWorker.register('/sw.js') })
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister()
+    }
+  })
 }
 
 const queryClient = new QueryClient({
