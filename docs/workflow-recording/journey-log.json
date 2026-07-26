@@ -1,0 +1,145 @@
+{
+  "persona": "KSP/MYS/INV/7731",
+  "steps": [
+    {
+      "step": 1,
+      "name": "home",
+      "note": "AI Home after login as Ananya Krishnamurthy",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/01-home.png"
+    },
+    {
+      "step": 2,
+      "name": "pending-investigations",
+      "note": "Quick card: unresolved chain snatching",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/02-pending-investigations.png"
+    },
+    {
+      "step": 3,
+      "name": "search-confirmed",
+      "note": "Confirmed Search records",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/03-search-confirmed.png"
+    },
+    {
+      "step": 4,
+      "name": "case-360-open",
+      "note": "Case 360 opened",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/04-case-360-open.png"
+    },
+    {
+      "step": 5,
+      "name": "tab-related-cases",
+      "note": "Case view tab: Related cases",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/05-tab-related-cases.png"
+    },
+    {
+      "step": 6,
+      "name": "tab-relationship-graph",
+      "note": "Case view tab: Relationship graph",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/06-tab-relationship-graph.png"
+    },
+    {
+      "step": 7,
+      "name": "tab-verification-priorities",
+      "note": "Case view tab: Verification priorities",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/07-tab-verification-priorities.png"
+    },
+    {
+      "step": 8,
+      "name": "tab-record-assurance",
+      "note": "Case view tab: Record assurance",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/08-tab-record-assurance.png"
+    },
+    {
+      "step": 9,
+      "name": "tab-grounded-brief",
+      "note": "Case view tab: Grounded brief",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/09-tab-grounded-brief.png"
+    },
+    {
+      "step": 10,
+      "name": "brief-pdf",
+      "note": "Clicked /Download.*PDF|PDF/i",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/10-brief-pdf.png"
+    },
+    {
+      "step": 11,
+      "name": "case-summary-card",
+      "note": "Case Summary quick card",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/11-case-summary-card.png"
+    },
+    {
+      "step": 12,
+      "name": "send-me-pdf",
+      "note": "Chat assist: send me PDF",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens-journey/12-send-me-pdf.png"
+    },
+    {
+      "step": 13,
+      "name": "demo-query-loaded",
+      "note": "Loaded prepared demo query",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/search",
+      "screenshot": "screens-journey/13-demo-query-loaded.png"
+    },
+    {
+      "step": 14,
+      "name": "form-search-results",
+      "note": "Form-first Search records results",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/search",
+      "screenshot": "screens-journey/14-form-search-results.png"
+    },
+    {
+      "step": 15,
+      "name": "module-dashboard",
+      "note": "/app/dashboard",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/dashboard",
+      "screenshot": "screens-journey/15-module-dashboard.png"
+    },
+    {
+      "step": 16,
+      "name": "module-analytics",
+      "note": "/app/analytics",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/analytics",
+      "screenshot": "screens-journey/16-module-analytics.png"
+    },
+    {
+      "step": 17,
+      "name": "module-reports",
+      "note": "/app/reports",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/reports",
+      "screenshot": "screens-journey/17-module-reports.png"
+    },
+    {
+      "step": 18,
+      "name": "module-evidence",
+      "note": "/app/evidence",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/evidence",
+      "screenshot": "screens-journey/18-module-evidence.png"
+    },
+    {
+      "step": 19,
+      "name": "module-settings",
+      "note": "/app/settings",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/settings",
+      "screenshot": "screens-journey/19-module-settings.png"
+    },
+    {
+      "step": 20,
+      "name": "logged-out",
+      "note": "Back at login",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/auth/login",
+      "screenshot": "screens-journey/20-logged-out.png"
+    }
+  ]
+}

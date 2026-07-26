@@ -1,0 +1,238 @@
+{
+  "base_url": "https://appsail-50044124045.development.catalystappsail.in",
+  "persona": {
+    "officer_id": "KSP/MYS/INV/7731",
+    "full_name": "Ananya Krishnamurthy",
+    "role": "INVESTIGATOR",
+    "station": "Nazarbad PS",
+    "district": "Mysuru",
+    "idea": "Junior Investigating Officer at Nazarbad PS (Mysuru) starting a night shift: clear unresolved chain-snatching FIRs, open Case 360, check trends, prepare a brief, then ask Chat Assist for a PDF dossier."
+  },
+  "registered_attempt": true,
+  "steps": [
+    {
+      "step": 0,
+      "name": "api-health",
+      "note": "status=ok db=ok",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/api/health",
+      "at": "2026-07-26T16:53:55.653Z"
+    },
+    {
+      "step": 1,
+      "name": "landing",
+      "note": "Public landing — KSP / ANVAYA portal entry",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/",
+      "screenshot": "screens/01-landing.png",
+      "at": "2026-07-26T16:53:58.813Z"
+    },
+    {
+      "step": 2,
+      "name": "landing-kannada",
+      "note": "Landing chrome toggled to Kannada (or back)",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/",
+      "screenshot": "screens/02-landing-kannada.png",
+      "at": "2026-07-26T16:53:59.597Z"
+    },
+    {
+      "step": 3,
+      "name": "login",
+      "note": "Officer Sign-In page with demo credentials hint",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/auth/login",
+      "screenshot": "screens/03-login.png",
+      "at": "2026-07-26T16:54:00.979Z"
+    },
+    {
+      "step": 4,
+      "name": "register-empty",
+      "note": "New Officer Registration form",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/auth/register",
+      "screenshot": "screens/04-register-empty.png",
+      "at": "2026-07-26T16:54:02.313Z"
+    },
+    {
+      "step": 5,
+      "name": "register-filled",
+      "note": "Filled registration for KSP/MYS/INV/7731 / Ananya Krishnamurthy",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/auth/register",
+      "screenshot": "screens/05-register-filled.png",
+      "at": "2026-07-26T16:54:02.502Z"
+    },
+    {
+      "step": 6,
+      "name": "register-success",
+      "note": "Registration succeeded — landed in /app",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/06-register-success.png",
+      "at": "2026-07-26T16:54:05.104Z"
+    },
+    {
+      "step": 7,
+      "name": "ai-home",
+      "note": "AI Home — conversation assist surface",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/07-ai-home.png",
+      "at": "2026-07-26T16:54:06.172Z"
+    },
+    {
+      "step": 8,
+      "name": "chat-query-typed",
+      "note": "Typed chat assist query: Open case SYN-CASE-0001",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/08-chat-query-typed.png",
+      "at": "2026-07-26T16:54:06.329Z"
+    },
+    {
+      "step": 9,
+      "name": "chat-query-result",
+      "note": "Chat assist response after case open query",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/09-chat-query-result.png",
+      "at": "2026-07-26T16:54:10.456Z"
+    },
+    {
+      "step": 10,
+      "name": "dashboard",
+      "note": "Shift Briefing / Dashboard overview",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/dashboard",
+      "screenshot": "screens/10-dashboard.png",
+      "at": "2026-07-26T16:54:12.487Z"
+    },
+    {
+      "step": 11,
+      "name": "analytics",
+      "note": "Crime Trends / Analytics (descriptive only)",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/analytics",
+      "screenshot": "screens/11-analytics.png",
+      "at": "2026-07-26T16:54:14.501Z"
+    },
+    {
+      "step": 12,
+      "name": "reports",
+      "note": "Reports console — dossiers & briefs",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/reports",
+      "screenshot": "screens/12-reports.png",
+      "at": "2026-07-26T16:54:16.516Z"
+    },
+    {
+      "step": 13,
+      "name": "evidence",
+      "note": "Evidence repository / chain of custody",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/evidence",
+      "screenshot": "screens/13-evidence.png",
+      "at": "2026-07-26T16:54:18.557Z"
+    },
+    {
+      "step": 14,
+      "name": "settings",
+      "note": "Settings — locale, preferences",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/settings",
+      "screenshot": "screens/14-settings.png",
+      "at": "2026-07-26T16:54:20.606Z"
+    },
+    {
+      "step": 15,
+      "name": "supervisor",
+      "note": "Supervisor panel (may be role-gated)",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/supervisor",
+      "screenshot": "screens/15-supervisor.png",
+      "at": "2026-07-26T16:54:22.615Z"
+    },
+    {
+      "step": 16,
+      "name": "search-alias",
+      "note": "Search alias route under AppShell",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/search",
+      "screenshot": "screens/16-search-alias.png",
+      "at": "2026-07-26T16:54:24.621Z"
+    },
+    {
+      "step": 17,
+      "name": "settings-kannada",
+      "note": "Settings language switched toward Kannada",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app/settings",
+      "screenshot": "screens/17-settings-kannada.png",
+      "at": "2026-07-26T16:54:26.852Z"
+    },
+    {
+      "step": 18,
+      "name": "topbar-language",
+      "note": "TopBar language switcher exercised",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/18-topbar-language.png",
+      "at": "2026-07-26T16:54:28.938Z"
+    },
+    {
+      "step": 19,
+      "name": "command-palette",
+      "note": "Command palette (Ctrl+K) if enabled",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/app",
+      "screenshot": "screens/19-command-palette.png",
+      "at": "2026-07-26T16:54:29.743Z"
+    },
+    {
+      "step": 20,
+      "name": "legacy-dashboard",
+      "note": "Legacy AuthenticatedLayout route /dashboard",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard",
+      "screenshot": "screens/20-legacy-dashboard.png",
+      "at": "2026-07-26T16:54:31.583Z"
+    },
+    {
+      "step": 21,
+      "name": "legacy-search",
+      "note": "Legacy AuthenticatedLayout route /dashboard/search",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/search",
+      "screenshot": "screens/21-legacy-search.png",
+      "at": "2026-07-26T16:54:33.299Z"
+    },
+    {
+      "step": 22,
+      "name": "legacy-analytics",
+      "note": "Legacy AuthenticatedLayout route /dashboard/analytics",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/analytics",
+      "screenshot": "screens/22-legacy-analytics.png",
+      "at": "2026-07-26T16:54:35.001Z"
+    },
+    {
+      "step": 23,
+      "name": "legacy-reports",
+      "note": "Legacy AuthenticatedLayout route /dashboard/reports",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/reports",
+      "screenshot": "screens/23-legacy-reports.png",
+      "at": "2026-07-26T16:54:36.716Z"
+    },
+    {
+      "step": 24,
+      "name": "legacy-health",
+      "note": "Legacy AuthenticatedLayout route /dashboard/health",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/health",
+      "screenshot": "screens/24-legacy-health.png",
+      "at": "2026-07-26T16:54:38.421Z"
+    },
+    {
+      "step": 25,
+      "name": "legacy-search-filters",
+      "note": "Legacy Search with FIR filters attempted",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/search",
+      "screenshot": "screens/25-legacy-search-filters.png",
+      "at": "2026-07-26T16:54:39.967Z"
+    },
+    {
+      "step": 26,
+      "name": "legacy-search-results",
+      "note": "Legacy Search results list",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/dashboard/search",
+      "screenshot": "screens/26-legacy-search-results.png",
+      "at": "2026-07-26T16:54:43.586Z"
+    },
+    {
+      "step": 27,
+      "name": "logout",
+      "note": "Logged out — back to login/public",
+      "url": "https://appsail-50044124045.development.catalystappsail.in/auth/login",
+      "screenshot": "screens/27-logout.png",
+      "at": "2026-07-26T16:54:46.482Z"
+    }
+  ],
+  "captured_at": "2026-07-26T16:54:46.482Z"
+}
