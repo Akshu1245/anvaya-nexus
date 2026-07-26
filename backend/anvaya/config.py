@@ -47,20 +47,20 @@ class Config:
     # or tests. No credentials are loaded from application configuration.
     CATALYST_DATASTORE_CLIENT = None
     CATALYST_SDK_INITIALIZER = None
-    # Optional AI assist (OpenRouter). Effective only when flag and key are both set.
-    AI_ASSIST_ENABLED = os.getenv("ANVAYA_AI_ASSIST_ENABLED", "false").lower() == "true"
-    OPENROUTER_API_KEY = os.getenv("ANVAYA_OPENROUTER_API_KEY", "")
+    # Optional AI assist (Gemini / OpenRouter). Auto-enabled when key is present.
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", os.getenv("ANVAYA_GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", ""))).strip()
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", os.getenv("ANVAYA_OPENROUTER_API_KEY", "")).strip()
+    AI_ASSIST_ENABLED = (os.getenv("ANVAYA_AI_ASSIST_ENABLED", "true").lower() == "true") or bool(GEMINI_API_KEY) or bool(OPENROUTER_API_KEY)
     OPENROUTER_BASE = os.getenv("ANVAYA_OPENROUTER_BASE", "https://openrouter.ai/api/v1")
-    # Free-tier default: OpenRouter free router + :free fallbacks (no paid models required).
-    OPENROUTER_MODEL = os.getenv("ANVAYA_OPENROUTER_MODEL", "openrouter/free")
+    OPENROUTER_MODEL = os.getenv("ANVAYA_OPENROUTER_MODEL", "google/gemini-2.5-flash" if GEMINI_API_KEY else "openrouter/free")
     OPENROUTER_FALLBACK_MODELS = os.getenv(
         "ANVAYA_OPENROUTER_FALLBACK_MODELS",
-        "openrouter/free,meta-llama/llama-3.3-70b-instruct:free,google/gemma-3-27b-it:free,qwen/qwen3-8b:free",
+        "google/gemini-2.5-flash,meta-llama/llama-3.3-70b-instruct:free,google/gemma-3-27b-it:free",
     )
-    OPENROUTER_TIMEOUT_SECONDS = int(os.getenv("ANVAYA_OPENROUTER_TIMEOUT_SECONDS", "6"))
-    # Optional voice / translation (Sarvam AI). Effective only when flag and key are both set.
-    VOICE_ENABLED = os.getenv("ANVAYA_VOICE_ENABLED", "false").lower() == "true"
-    SARVAM_API_KEY = os.getenv("ANVAYA_SARVAM_API_KEY", "")
+    OPENROUTER_TIMEOUT_SECONDS = int(os.getenv("ANVAYA_OPENROUTER_TIMEOUT_SECONDS", "10"))
+    # Optional voice / translation (Sarvam AI). Auto-enabled when key is present.
+    SARVAM_API_KEY = os.getenv("SARVAM_API_KEY", os.getenv("ANVAYA_SARVAM_API_KEY", "")).strip()
+    VOICE_ENABLED = (os.getenv("ANVAYA_VOICE_ENABLED", "true").lower() == "true") or bool(SARVAM_API_KEY)
     SARVAM_BASE = os.getenv("ANVAYA_SARVAM_BASE", "https://api.sarvam.ai")
     SARVAM_STT_MODEL = os.getenv("ANVAYA_SARVAM_STT_MODEL", "saaras:v3")
     SARVAM_TTS_MODEL = os.getenv("ANVAYA_SARVAM_TTS_MODEL", "bulbul:v3")
@@ -69,11 +69,11 @@ class Config:
 
 
 def ai_assist_enabled(config: Mapping[str, object]) -> bool:
-    return bool(config.get("AI_ASSIST_ENABLED")) and bool(str(config.get("OPENROUTER_API_KEY") or "").strip())
+    return bool(config.get("AI_ASSIST_ENABLED")) and (bool(str(config.get("GEMINI_API_KEY") or "").strip()) or bool(str(config.get("OPENROUTER_API_KEY") or "").strip()))
 
 
 def voice_enabled(config: Mapping[str, object]) -> bool:
-    return bool(config.get("VOICE_ENABLED")) and bool(str(config.get("SARVAM_API_KEY") or "").strip())
+    return bool(config.get("VOICE_ENABLED")) or bool(str(config.get("SARVAM_API_KEY") or "").strip())
 
 
 class DevelopmentConfig(Config):

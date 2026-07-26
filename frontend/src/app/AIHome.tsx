@@ -37,10 +37,13 @@ export function AIHome() {
   }, [chatStore.messages.length, authStore.busy])
 
   const handleVoiceToggle = useCallback(() => {
-    voice.startBrowserSpeech('en-IN', (text) => {
-      const prev = useChatStore.getState().input
-      chatStore.setInput(prev ? `${prev} ${text}` : text)
-    })
+    if (voice.isRecording) {
+      voice.stopRecording()
+    } else {
+      voice.startBrowserSpeech('en-IN', (text) => {
+        chatStore.setInput(text)
+      })
+    }
   }, [voice, chatStore])
 
   const handleListen = useCallback((text: string) => {
@@ -183,7 +186,7 @@ export function AIHome() {
               onInputChange={chatStore.setInput}
               onSend={handleSend}
               onVoiceToggle={handleVoiceToggle}
-              isRecording={chatStore.isRecording}
+              isRecording={voice.isRecording || chatStore.isRecording}
               isBusy={Boolean(authStore.busy)}
               onNewTopic={handleNewTopic}
               onFileDrop={handleFileDrop}

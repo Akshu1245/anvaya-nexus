@@ -4,7 +4,7 @@ import { FilePreview } from './MessageContent/FilePreview'
 type Props = {
   input: string
   onInputChange: (value: string) => void
-  onSend: (text: string) => void
+  onSend: (text: string, files?: File[]) => void
   onVoiceToggle: () => void
   isRecording: boolean
   isBusy: boolean
@@ -25,15 +25,44 @@ export function Composer({ input, onInputChange, onSend, onVoiceToggle, isRecord
     }
   }, [input])
 
+  // Read contents of text/CSV/JSON files if attached
+  const readFileContents = async (files: File[]): Promise<string> => {
+    let summary = ''
+    for (const f of files) {
+      if (f.type.includes('text') || f.name.endsWith('.csv') || f.name.endsWith('.json') || f.name.endsWith('.txt')) {
+        try {
+          const text = await f.text()
+          summary += `\n\n--- Attached File: ${f.name} (${Math.round(f.size / 1024)} KB) ---\n${text.slice(0, 4000)}`
+        } catch {
+          summary += `\n\n[Attached File: ${f.name} (${Math.round(f.size / 1024)} KB)]`
+        }
+      } else {
+        summary += `\n\n[Attached File: ${f.name} (${Math.round(f.size / 1024)} KB, type: ${f.type || 'document'})]`
+      }
+    }
+    return summary
+  }
+
+  const handleSendAction = useCallback(async () => {
+    const trimmed = input.trim()
+    if (!trimmed && attachedFiles.length === 0) return
+
+    let finalPrompt = trimmed
+    if (attachedFiles.length > 0) {
+      const fileContext = await readFileContents(attachedFiles)
+      finalPrompt = (trimmed ? trimmed : 'Analyzing attached file(s)...') + fileContext
+    }
+
+    onSend(finalPrompt, attachedFiles)
+    setAttachedFiles([])
+  }, [input, attachedFiles, onSend])
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (input.trim() || attachedFiles.length) {
-        onSend(input)
-        setAttachedFiles([])
-      }
+      void handleSendAction()
     }
-  }, [input, attachedFiles, onSend])
+  }, [handleSendAction])
 
   const handleFilePick = useCallback(() => {
     fileInputRef.current?.click()
@@ -72,26 +101,48 @@ export function Composer({ input, onInputChange, onSend, onVoiceToggle, isRecord
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`relative rounded-xl border transition-all ${
-        dragging
+      className={`relative rounded-2xl border transition-all ${
+        isRecording
+          ? 'border-red-400 bg-red-50/20 shadow-lg shadow-red-500/10 dark:border-red-500 dark:bg-red-950/20'
+          : dragging
           ? 'border-teal-400 bg-teal-50 dark:border-teal-500 dark:bg-teal-900/20'
-          : 'border-slate-200 bg-white dark:border-slate-600 dark:bg-navy-900'
+          : 'border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900'
       }`}
     >
+      {/* Drop overlay */}
       {dragging && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl border-2 border-dashed border-teal-400 bg-teal-50/90 text-sm font-semibold text-teal-700 dark:bg-teal-900/80 dark:text-teal-300">
-          Drop files here
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-teal-400 bg-teal-50/90 text-sm font-semibold text-teal-700 dark:bg-teal-900/80 dark:text-teal-300">
+          📁 Drop files to attach to conversation
         </div>
       )}
 
+      {/* Live recording indicator header */}
+      {isRecording && (
+        <div className="flex items-center justify-between border-b border-red-200 bg-red-50/80 px-4 py-2 text-xs font-semibold text-red-700 dark:border-red-900/40 dark:bg-red-950/50 dark:text-red-300 rounded-t-2xl animate-pulse">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
+            <span className="material-icons-outlined" style={{ fontSize: 16 }}>mic</span>
+            <span>Recording... Speak now (Real-time transcript updates below)</span>
+          </div>
+          <button
+            onClick={onVoiceToggle}
+            className="rounded px-2 py-0.5 bg-red-600 text-white font-bold text-[10px] hover:bg-red-700 transition-colors"
+          >
+            DONE / STOP
+          </button>
+        </div>
+      )}
+
+      {/* Attached file previews */}
       {attachedFiles.length > 0 && (
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 p-3 dark:border-slate-600">
+        <div className="flex flex-wrap gap-2 border-b border-slate-200 p-3 dark:border-slate-700">
           {attachedFiles.map((file, i) => (
-            <div key={i} className="relative">
+            <div key={i} className="relative group">
               <FilePreview file={{ name: file.name, type: file.type, size: file.size, url: URL.createObjectURL(file) }} />
               <button
                 onClick={() => setAttachedFiles((prev) => prev.filter((_, j) => j !== i))}
-                className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] text-white hover:bg-red-600"
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white hover:bg-red-600 shadow"
+                title="Remove attachment"
               >
                 ×
               </button>
@@ -100,49 +151,74 @@ export function Composer({ input, onInputChange, onSend, onVoiceToggle, isRecord
         </div>
       )}
 
-      <div className="flex items-end gap-2 p-2">
+      {/* Input row */}
+      <div className="flex items-end gap-2 p-2.5">
         <div className="flex items-center gap-1">
+          {/* Voice Mic Button */}
           <button
             type="button"
             onClick={onVoiceToggle}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-              isRecording ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+              isRecording
+                ? 'bg-red-600 text-white shadow-md animate-pulse'
+                : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
             }`}
             aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
+            title={isRecording ? 'Click to stop recording' : 'Voice input (Real-time speech to text)'}
             disabled={isBusy}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span className="material-icons-outlined" style={{ fontSize: 20 }}>
+              {isRecording ? 'mic' : 'mic_none'}
+            </span>
           </button>
+
+          {/* File Attachment Button */}
           <button
             type="button"
             onClick={handleFilePick}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
             aria-label="Attach file"
+            title="Attach documents, CSV, FIR files, images"
+            disabled={isBusy}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            <span className="material-icons-outlined" style={{ fontSize: 20 }}>attach_file</span>
           </button>
-          <input ref={fileInputRef} type="file" multiple onChange={handleFilesChosen} className="hidden" accept=".pdf,.png,.jpg,.jpeg,.webp,.csv,.xlsx,.docx,.mp3,.wav,.mp4" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFilesChosen}
+            className="hidden"
+            accept=".pdf,.png,.jpg,.jpeg,.webp,.csv,.xlsx,.docx,.txt,.json,.mp3,.wav,.mp4"
+          />
         </div>
 
+        {/* Text Area */}
         <textarea
           ref={textareaRef}
           value={input}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask in English, ಕನ್ನಡ, or हिन्दी..."
+          placeholder={isRecording ? 'Listening... Spoken words appear here in real-time...' : 'Ask in English, ಕನ್ನಡ, or हिन्दी...'}
           rows={1}
-          className="max-h-[200px] min-h-[36px] flex-1 resize-none bg-transparent px-1 py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-200 dark:placeholder:text-slate-500"
+          className="max-h-[200px] min-h-[38px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           disabled={isBusy}
         />
 
+        {/* Send Button */}
         <button
           type="button"
-          onClick={() => { onSend(input); setAttachedFiles([]) }}
-          disabled={!input.trim() && !attachedFiles.length}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white transition-colors hover:bg-teal-700 disabled:opacity-40 dark:bg-teal-600 dark:hover:bg-teal-500"
+          onClick={() => void handleSendAction()}
+          disabled={isBusy || (!input.trim() && attachedFiles.length === 0)}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+            input.trim() || attachedFiles.length > 0
+              ? 'bg-[#003087] text-white shadow-md hover:bg-blue-900 dark:bg-amber-500 dark:text-slate-900 dark:hover:bg-amber-400'
+              : 'bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600'
+          }`}
           aria-label="Send message"
+          title="Send"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span className="material-icons-outlined" style={{ fontSize: 18 }}>send</span>
         </button>
       </div>
     </div>

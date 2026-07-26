@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { m3Api, type HealthStatus } from '../api/m3'
 import { useAuthStore } from '../stores/authStore'
 
@@ -7,25 +7,103 @@ type VoiceHook = {
   startRecording: (lang: string) => void
   stopRecording: () => void
   startPushToTalk: (lang: string) => () => void
-  startBrowserSpeech: (lang: string, onResult: (text: string) => void) => void
+  startBrowserSpeech: (lang: string, onResult: (text: string, isFinal?: boolean) => void) => void
   speakText: (text: string, langCode: string) => Promise<void>
   isVoiceAvailable: (health: HealthStatus | null) => boolean
 }
 
 export function useVoice(
-  setIsRecording: (v: boolean) => void,
+  setIsRecordingStore: (v: boolean) => void,
   onTranscript: (text: string) => void,
 ): VoiceHook {
   const authStore = useAuthStore()
+  const [isRecording, setIsRecordingState] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  const recognitionRef = useRef<any>(null)
+
   const speechCtor =
     typeof window !== 'undefined'
       ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
       : null
 
+  const setRecording = useCallback(
+    (recording: boolean) => {
+      setIsRecordingState(recording)
+      setIsRecordingStore(recording)
+    },
+    [setIsRecordingStore],
+  )
+
+  const startBrowserSpeech = useCallback(
+    (lang: string, onResult: (text: string, isFinal?: boolean) => void) => {
+      if (!speechCtor) {
+        authStore.setError('Voice recognition not supported in this browser. Please use Chrome/Edge or type your question.')
+        return
+      }
+
+      try {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.stop() } catch {}
+        }
+
+        const recognition = new speechCtor()
+        recognition.lang = lang === 'kn' ? 'kn-IN' : (lang === 'hi' ? 'hi-IN' : 'en-IN')
+        recognition.continuous = true
+        recognition.interimResults = true
+
+        recognition.onstart = () => {
+          setRecording(true)
+        }
+
+        recognition.onresult = (event: any) => {
+          let interimTranscript = ''
+          let finalTranscript = ''
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcript = event.results[i][0].transcript
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' '
+            } else {
+              interimTranscript += transcript
+            }
+          }
+
+          const combined = (finalTranscript + interimTranscript).trim()
+          if (combined) {
+            onResult(combined, false)
+          }
+        }
+
+        recognition.onerror = (event: any) => {
+          if (event.error !== 'no-speech') {
+            authStore.setError(`Voice recognition issue: ${event.error || 'error'}. Try typing.`)
+          }
+          setRecording(false)
+        }
+
+        recognition.onend = () => {
+          setRecording(false)
+        }
+
+        recognitionRef.current = recognition
+        recognition.start()
+      } catch (e) {
+        setRecording(false)
+        authStore.setError('Unable to start microphone. Please check permissions.')
+      }
+    },
+    [speechCtor, setRecording, authStore],
+  )
+
   const startRecording = useCallback(
     async (lang: string) => {
+      // Prefer real-time browser speech recognition for instant input bar rendering
+      if (speechCtor) {
+        startBrowserSpeech(lang, (text) => onTranscript(text))
+        return
+      }
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -33,21 +111,19 @@ export function useVoice(
           : 'audio/webm'
         const recorder = new MediaRecorder(stream, { mimeType })
         audioChunksRef.current = []
-        setIsRecording(true)
+        setRecording(true)
 
         recorder.ondataavailable = (e) => {
           if (e.data.size > 0) audioChunksRef.current.push(e.data)
         }
 
         recorder.onstop = async () => {
-          setIsRecording(false)
+          setRecording(false)
           stream.getTracks().forEach((t) => t.stop())
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
           authStore.setBusy('transcribing')
           try {
-            const result = await m3Api
-              .voiceTranscribe(audioBlob, lang)
-              .catch(() => null)
+            const result = await m3Api.voiceTranscribe(audioBlob, lang).catch(() => null)
             if (result?.text) onTranscript(result.text)
           } finally {
             authStore.setBusy('')
@@ -60,12 +136,19 @@ export function useVoice(
         authStore.setError('Microphone access denied. Type your question instead.')
       }
     },
-    [setIsRecording, onTranscript, authStore],
+    [speechCtor, startBrowserSpeech, setRecording, onTranscript, authStore],
   )
 
   const stopRecording = useCallback(() => {
-    mediaRecorderRef.current?.stop()
-  }, [])
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop() } catch {}
+      recognitionRef.current = null
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop() } catch {}
+    }
+    setRecording(false)
+  }, [setRecording])
 
   const startPushToTalk = useCallback(
     (lang: string) => {
@@ -79,23 +162,6 @@ export function useVoice(
       }
     },
     [startRecording, stopRecording],
-  )
-
-  const startBrowserSpeech = useCallback(
-    (lang: string, onResult: (text: string) => void) => {
-      if (!speechCtor) return
-      const recognition = new speechCtor()
-      recognition.lang = lang
-      recognition.interimResults = false
-      recognition.onresult = (event: any) => {
-        const transcript = event.results?.[0]?.[0]?.transcript || ''
-        onResult(transcript)
-      }
-      recognition.onerror = () =>
-        authStore.setError('Voice input unavailable. Type instead.')
-      recognition.start()
-    },
-    [speechCtor, authStore],
   )
 
   const speakText = useCallback(
@@ -128,7 +194,7 @@ export function useVoice(
   )
 
   return {
-    isRecording: false,
+    isRecording,
     startRecording,
     stopRecording,
     startPushToTalk,
