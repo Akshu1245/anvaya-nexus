@@ -228,7 +228,14 @@ export function ConversationExperience() {
   }, [authStore])
 
   const handleMic = useCallback(() => {
-    if (health?.voice_enabled) { voice.startRecording(language.sarvamCode); return }
+    if (chatStore.isRecording || voice.isRecording) {
+      voice.stopRecording()
+      return
+    }
+    if (health?.voice_enabled) {
+      voice.startRecording(language.sarvamCode)
+      return
+    }
     voice.startBrowserSpeech(language.code, (text) => {
       const prev = useChatStore.getState().input
       chatStore.setInput(prev ? `${prev} ${text}` : text)
