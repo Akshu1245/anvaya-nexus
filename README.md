@@ -182,11 +182,4 @@ Legacy chat-only and Nexus workspaces remain in the repo for tests/history; they
 - The downloadable **synthetic investigation dossier PDF** is a DRAFT for human review. It is not a BNSS/CrPC charge-sheet and not a live CCTNS export. Exhibit images are generated watermarked placeholders with hashes and source IDs; decorative offence icons are never evidence.
 - The repository and final live redeployment are complete; the owner still needs the demo video, organiser PPT, source-ZIP hash and rollback confirmation.
 
-### Remaining owner actions before judging
-
-1. Add `ANVAYA_OPENROUTER_API_KEY` (free-tier key; set `ANVAYA_OPENROUTER_MODEL=openrouter/free`) and `ANVAYA_SARVAM_API_KEY` only in AppSail environment variables; never commit either key. Redeploy after changing keys.
-2. Enable the corresponding feature flags and redeploy the latest frontend/backend build.
-3. Verify `/api/health` reports the intended AI and voice flags, then complete the public-demo golden journey.
-4. Capture safe screenshots/video and complete the remaining organiser submission evidence.
-
 See [FINAL_SUBMISSION_STATUS.md](docs/FINAL_SUBMISSION_STATUS.md), [SUBMISSION_EVIDENCE_TEMPLATE.md](docs/SUBMISSION_EVIDENCE_TEMPLATE.md), and the timed [OWNER_SUBMIT_RUNBOOK.md](docs/OWNER_SUBMIT_RUNBOOK.md) before judging.
