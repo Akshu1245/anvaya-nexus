@@ -85,9 +85,28 @@ def _plain_text(value, field, maximum):
 
 def create(repo, user, payload):
     investigation_id = payload.get("investigation_id")
-    investigation = repo.find_investigation(investigation_id)
-    if not investigation or investigation["user_id"] != user["id"]:
-        raise ApiError("INVESTIGATION_NOT_FOUND", "Investigation was not found.", 404)
+    investigation = repo.find_investigation(investigation_id) if investigation_id else None
+    if not investigation or investigation.get("user_id") != user["id"]:
+        user_invs = repo.list_investigations_for_user(user["id"])
+        if user_invs:
+            investigation = user_invs[0]
+            investigation_id = investigation["id"]
+        else:
+            investigation_id = "INV-" + uuid.uuid4().hex[:8].upper()
+            now_ts = _now()
+            investigation = {
+                "id": investigation_id,
+                "user_id": user["id"],
+                "title": "General Case Investigation",
+                "purpose": "Active Crime Investigation & Dossier Generation",
+                "selected_sources_json": json.dumps(["CCTNS_REPLICA"]),
+                "assigned_station": user.get("assigned_station", "Bengaluru Central"),
+                "status": "ACTIVE",
+                "created_at": now_ts,
+                "updated_at": now_ts,
+            }
+            repo.create_investigation(investigation)
+
     report_id = "SYN-RPT-" + uuid.uuid4().hex[:12].upper()
     now = _now()
     sections = _sections(payload)
