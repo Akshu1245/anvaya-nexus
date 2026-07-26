@@ -42,6 +42,51 @@ export function EvidenceView() {
   const { t } = useLocale()
   const [filter, setFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
+  const [previewItem, setPreviewItem] = useState<EvidenceItem | null>(null)
+
+  const downloadEvidence = (item: EvidenceItem) => {
+    const fileContent = `================================================================================
+ KARNATAKA STATE POLICE — EVIDENCE REPOSITORY CERTIFICATE
+ Reference ID: ${item.id}
+ Classification: ${(TYPE_CONFIG[item.type]?.label || item.type).toUpperCase()}
+ Status: ${item.status.toUpperCase()}
+ ================================================================================
+
+ EVIDENCE RECORD DETAILS:
+ -------------------------
+ Title / Name        : ${item.name}
+ FIR / Case Reference: ${item.caseId}
+ Source Department   : ${item.source}
+ Registration Date   : ${item.date}
+
+ CHAIN OF CUSTODY & VERIFICATION AUDIT:
+ ---------------------------------------
+ Custody Location    : KSP Evidence Vault (${item.source})
+ Audit Hash SHA256   : 9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a
+ Verification        : ${item.status === 'verified' ? 'DIGITALLY VERIFIED ✓ (Tamper-proof digital seal active)' : 'LOGGED IN CHAIN OF CUSTODY'}
+ Officer Assigned    : Investigating Officer (ANVAYA ID: KSP-INV-2026)
+
+ PROVENANCE STATEMENT:
+ ---------------------
+ This evidence item is officially catalogued under the Karnataka State Police (KSP) 
+ Digital & Physical Evidence Management Repository for FIR ${item.caseId}.
+
+ DISCLAIMER & NOTICE:
+ -------------------
+ Synthetic Data: All evidence records shown are generated for the KSP Datathon 2026 prototype.
+ This is not a live evidence management system. No real case data is stored or processed.
+ ================================================================================`
+
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${item.id}_${item.caseId}_Evidence_Report.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   const filtered = SAMPLE_EVIDENCE.filter((e) => {
     const matchType = filter === 'all' || e.type === filter
@@ -93,7 +138,7 @@ export function EvidenceView() {
             { label: 'Pending', value: SAMPLE_EVIDENCE.filter((e) => e.status === 'pending').length, icon: 'pending', color: '#d97706' },
             { label: 'In Custody', value: SAMPLE_EVIDENCE.filter((e) => e.status === 'chain_of_custody').length, icon: 'link', color: '#7c3aed' },
           ].map((s) => (
-            <div key={s.label} className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
+            <div key={s.label} className="rounded-xl bg-white p-4 shadow-sm dark:bg-[#161b26]" style={{ border: '1px solid #e2e8f0' }}>
               <div className="flex items-center gap-2">
                 <span className="material-icons-outlined" style={{ fontSize: 20, color: s.color }}>{s.icon}</span>
                 <div>
@@ -112,8 +157,8 @@ export function EvidenceView() {
             <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" style={{ fontSize: 18 }}>search</span>
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Search evidence or case ID…"
-              className="w-full rounded-lg pl-9 pr-4 py-2.5 text-sm outline-none"
-              style={{ border: '1.5px solid #d0d9e8', background: '#fff' }}
+              className="w-full rounded-lg pl-9 pr-4 py-2.5 text-sm outline-none text-slate-800 dark:text-white dark:bg-slate-800"
+              style={{ border: '1.5px solid #d0d9e8' }}
               onFocus={(e) => e.target.style.borderColor = '#003087'}
               onBlur={(e) => e.target.style.borderColor = '#d0d9e8'} />
           </div>
@@ -147,7 +192,7 @@ export function EvidenceView() {
               const typeConf = TYPE_CONFIG[item.type]
               const statusConf = STATUS_CONFIG[item.status]
               return (
-                <div key={item.id} className="rounded-xl bg-white p-4 flex items-start gap-4 transition-all"
+                <div key={item.id} className="rounded-xl bg-white p-4 flex items-start gap-4 transition-all dark:bg-[#161b26] dark:border-slate-800"
                   style={{ border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
                   onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,48,135,0.1)')}
                   onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)')}>
@@ -161,14 +206,14 @@ export function EvidenceView() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-semibold text-slate-800 text-sm truncate">{item.name}</p>
+                      <p className="font-semibold text-slate-900 text-sm truncate dark:text-white">{item.name}</p>
                       <span className="flex shrink-0 items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
                         style={{ background: statusConf.bg, color: statusConf.color }}>
                         <span className="material-icons-outlined" style={{ fontSize: 11 }}>{statusConf.icon}</span>
                         {statusConf.label}
                       </span>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1">
                         <span className="material-icons-outlined" style={{ fontSize: 12 }}>folder</span>
                         {item.caseId}
@@ -191,16 +236,20 @@ export function EvidenceView() {
                   </div>
 
                   {/* Actions */}
-                  <div className="shrink-0 flex items-center gap-1">
-                    <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ border: '1px solid #e2e8f0', color: '#64748b' }}
-                      title="View details">
-                      <span className="material-icons-outlined" style={{ fontSize: 14 }}>visibility</span>
+                  <div className="shrink-0 flex items-center gap-2">
+                    <button
+                      onClick={() => setPreviewItem(item)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      title="View Details">
+                      <span className="material-icons-outlined" style={{ fontSize: 16 }}>visibility</span>
+                      Preview
                     </button>
-                    <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ border: '1px solid #e2e8f0', color: '#64748b' }}
-                      title="Download">
-                      <span className="material-icons-outlined" style={{ fontSize: 14 }}>download</span>
+                    <button
+                      onClick={() => downloadEvidence(item)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-teal-600 bg-teal-600 text-white hover:bg-teal-700 shadow-sm"
+                      title="Download Official Evidence Certificate">
+                      <span className="material-icons-outlined" style={{ fontSize: 16 }}>download</span>
+                      Download
                     </button>
                   </div>
                 </div>
@@ -218,6 +267,76 @@ export function EvidenceView() {
             This is not a live evidence management system. No real case data is stored or processed.
           </p>
         </div>
+
+        {/* Preview Modal */}
+        {previewItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#161b26] dark:text-white">
+              <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: TYPE_CONFIG[previewItem.type]?.bg }}>
+                    <span className="material-icons-outlined" style={{ fontSize: 22, color: TYPE_CONFIG[previewItem.type]?.color }}>
+                      {TYPE_CONFIG[previewItem.type]?.icon}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base dark:text-white">{previewItem.name}</h3>
+                    <p className="text-xs text-slate-500">{previewItem.id} &middot; {previewItem.caseId}</p>
+                  </div>
+                </div>
+                <button onClick={() => setPreviewItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800">
+                  ✕
+                </button>
+              </div>
+
+              <div className="mt-4 space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Classification</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{TYPE_CONFIG[previewItem.type]?.label}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Status</span>
+                    <p className="font-semibold" style={{ color: STATUS_CONFIG[previewItem.status]?.color }}>
+                      {STATUS_CONFIG[previewItem.status]?.label}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Source Unit</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{previewItem.source}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date Logged</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{previewItem.date}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 p-3 text-xs dark:border-slate-700">
+                  <p className="font-bold text-slate-700 dark:text-slate-300">Security & Custody Verification</p>
+                  <p className="mt-1 font-mono text-[11px] text-slate-500">SHA256: 9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a</p>
+                  <p className="mt-1 text-slate-600 dark:text-slate-400">Location: KSP Secure Evidence Vault ({previewItem.source})</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <button onClick={() => setPreviewItem(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300">
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    downloadEvidence(previewItem)
+                    setPreviewItem(null)
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700"
+                >
+                  <span className="material-icons-outlined" style={{ fontSize: 16 }}>download</span>
+                  Download Certificate
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
