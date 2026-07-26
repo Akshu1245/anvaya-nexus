@@ -477,6 +477,18 @@ def reports_detail(rid):
  repo=current_app.extensions['repository'];r=_report(repo,rid)
  if not allowed(repo,g.user,r):raise ApiError('REPORT_DENIED','Report access is denied.',403)
  v=repo.list_report_versions(rid);history=repo.list_report_review_history(rid);audit(repo,'REPORT_VIEWED','SUCCESS',g.user['id'],g.request_id,{'report_id':rid});return _ok({'report':r,'versions':v,'review_history':history,'allowed_actions':['review'] if g.user['role']=='SUPERVISOR' else ['update','submit']})
+
+@m3_blueprint.get('/reports/<rid>/pdf')
+@m3_blueprint.get('/reports/<rid>/download')
+@protected
+def reports_download_pdf(rid):
+ repo=current_app.extensions['repository'];r=_report(repo,rid)
+ if not allowed(repo,g.user,r):raise ApiError('REPORT_DENIED','Report access is denied.',403)
+ from backend.anvaya.services.report_pdf import generate_report_pdf
+ pdf_bytes = generate_report_pdf(r, author_name=g.user.get('username','Investigating Officer'))
+ audit(repo,'REPORT_PDF_DOWNLOADED','SUCCESS',g.user['id'],g.request_id,{'report_id':rid})
+ return send_file(BytesIO(pdf_bytes), mimetype='application/pdf', as_attachment=True, download_name=f"anvaya-report-{rid.lower()}.pdf")
+
 @m3_blueprint.get('/reports/<rid>/versions/<int:number>')
 @protected
 def reports_version(rid,number):

@@ -167,6 +167,8 @@ function groupSessions(sessions: any[]) {
   return g
 }
 
+import { useLocale } from '../i18n/portal'
+
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export function Sidebar() {
   const navigate = useNavigate()
@@ -174,9 +176,11 @@ export function Sidebar() {
   const chatStore = useChatStore()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
+  const { locale } = useLocale()
   const { darkMode, toggleDarkMode } = useUIStore()
   const [renaming, setRenaming] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [viewBookmarksOnly, setViewBookmarksOnly] = useState(false)
 
   const isActive = (path: string) => {
     if (path === '/app') return location.pathname === '/app' || location.pathname.startsWith('/app/chat')
@@ -218,16 +222,16 @@ export function Sidebar() {
     : recent
   const groups = groupSessions(filtered)
 
-  // Nav sections
+  // Nav sections with bilingual labels
   const mainNav = [
-    { id: 'home', path: '/app', label: 'AI Chat', icon: ICN.home },
-    { id: 'dashboard', path: '/app/dashboard', label: 'Dashboard', icon: ICN.dashboard },
-    { id: 'analytics', path: '/app/analytics', label: 'Analytics', icon: ICN.analytics },
-    { id: 'reports', path: '/app/reports', label: 'Reports', icon: ICN.reports },
-    { id: 'evidence', path: '/app/evidence', label: 'Evidence', icon: ICN.evidence },
+    { id: 'home', path: '/app', label: locale === 'kn' ? 'ಎಐ ಚಾಟ್' : 'AI Chat', icon: ICN.home },
+    { id: 'dashboard', path: '/app/dashboard', label: locale === 'kn' ? 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್' : 'Dashboard', icon: ICN.dashboard },
+    { id: 'analytics', path: '/app/analytics', label: locale === 'kn' ? 'ವಿಶ್ಲೇಷಣೆ' : 'Analytics', icon: ICN.analytics },
+    { id: 'reports', path: '/app/reports', label: locale === 'kn' ? 'ವರದಿಗಳು' : 'Reports', icon: ICN.reports },
+    { id: 'evidence', path: '/app/evidence', label: locale === 'kn' ? 'ಸಾಕ್ಷ್ಯ' : 'Evidence', icon: ICN.evidence },
   ]
   const supervisorNav = user?.role === 'SUPERVISOR'
-    ? [{ id: 'supervisor', path: '/app/supervisor', label: 'Supervisor', icon: ICN.supervisor }]
+    ? [{ id: 'supervisor', path: '/app/supervisor', label: locale === 'kn' ? 'ಮೇಲ್ವಿಚಾರಕ' : 'Supervisor', icon: ICN.supervisor }]
     : []
 
   const userInitial = (user?.username || 'U').charAt(0).toUpperCase()

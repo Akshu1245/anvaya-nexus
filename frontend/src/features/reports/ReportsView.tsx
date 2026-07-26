@@ -85,15 +85,22 @@ export function ReportsView() {
                     {r.author ? ` · ${r.author}` : ''}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-3">
+                <div className="flex shrink-0 items-center gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusColors[r.status] || statusColors.DRAFT}`}>
                     {(r.status || 'DRAFT').replace(/_/g, ' ')}
                   </span>
                   <button
-                    onClick={() => window.open(`/api/reports/${r.id}/preview`, '_blank')}
-                    className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 font-medium"
+                    onClick={async () => {
+                      try {
+                        await m3Api.reportPdf(r.id)
+                      } catch (err) {
+                        alert((err as Error).message || 'Unable to download report PDF.')
+                      }
+                    }}
+                    className="flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-900/30 dark:text-teal-300 transition-colors"
                   >
-                    View →
+                    <span className="material-icons-outlined" style={{ fontSize: 14 }}>picture_as_pdf</span>
+                    Download PDF
                   </button>
                 </div>
               </div>

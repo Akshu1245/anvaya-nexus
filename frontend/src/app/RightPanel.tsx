@@ -1,6 +1,7 @@
 import { useUIStore } from '../stores/uiStore'
 import { useInvestigationStore } from '../stores/investigationStore'
 import { useAuthStore } from '../stores/authStore'
+import { m3Api } from '../api/m3'
 
 export function RightPanel() {
   const { intelligenceOpen, setIntelligenceOpen } = useUIStore()
@@ -70,7 +71,22 @@ export function RightPanel() {
         <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Quick Actions</p>
           <div className="mt-2 grid grid-cols-2 gap-1.5">
-            <button className="rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800">Export PDF</button>
+            <button
+              onClick={() => {
+                const chatState = (window as any).__chatStore?.getState?.() || {}
+                const currentSessionId = chatState.currentSessionId || 'INV-1'
+                const messages = chatState.messages || []
+                const turns = messages.map((m: any) => ({
+                  role: m.sender === 'user' ? 'user' : 'assistant',
+                  text: m.text || '',
+                  kind: 'text',
+                  created_at: new Date(m.timestamp || Date.now()).toISOString()
+                }))
+                m3Api.conversationPdf(currentSessionId, turns).catch(() => window.print())
+              }}
+              className="rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1">
+              <span>📄</span> Export PDF
+            </button>
             <button className="rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800">Share</button>
             <button className="rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800">Add Note</button>
             <button className="rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800">Bookmark</button>

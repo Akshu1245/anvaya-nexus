@@ -1,7 +1,9 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useUIStore } from '../stores/uiStore'
 import { useAuthStore } from '../stores/authStore'
 import { useChatStore } from '../stores/chatStore'
+import { useLocale } from '../i18n/portal'
 import { m3Api } from '../api/m3'
 
 const pageTitles: Record<string, string> = {
@@ -13,6 +15,17 @@ const pageTitles: Record<string, string> = {
   '/app/evidence': 'Evidence Repository',
   '/app/supervisor': 'Supervisor Panel',
   '/app/settings': 'Settings',
+}
+
+const pageTitlesKn: Record<string, string> = {
+  '/app': 'ಎಐ ತನಿಖಾ ಚಾಟ್',
+  '/app/dashboard': 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+  '/app/analytics': 'ಅಪರಾಧ ವಿಶ್ಲೇಷಣೆ',
+  '/app/reports': 'ತನಿಖಾ ವರದಿಗಳು',
+  '/app/workspace': 'ಕೇಸ್ ಕಾರ್ಯಕ್ಷೇತ್ರ',
+  '/app/evidence': 'ಸಾಕ್ಷ್ಯ ಭಂಡಾರ',
+  '/app/supervisor': 'ಮೇಲ್ವಿಚಾರಕರ ಫಲಕ',
+  '/app/settings': 'ಸಂಯೋಜನೆಗಳು',
 }
 
 const pageIcons: Record<string, string> = {
@@ -33,12 +46,34 @@ export function TopBar() {
   const setUser = useAuthStore((s) => s.setUser)
   const conversationTitle = useChatStore((s) => s.conversationTitle)
   const messages = useChatStore((s) => s.messages)
+  const sessions = useChatStore((s) => s.sessions)
+  const restoreSession = useChatStore((s) => s.restoreSession)
+  const toggleBookmark = useChatStore((s) => s.toggleBookmark)
+  const { locale, setLocale } = useLocale()
   const { setMobileSidebarOpen, setCommandPaletteOpen, intelligenceOpen, setIntelligenceOpen } = useUIStore()
+  const [bookmarksModalOpen, setBookmarksModalOpen] = useState(false)
+
+  // Gather all bookmarked messages across active messages and sessions
+  const allBookmarks: Array<{ message: any; sessionTitle: string; sessionId: string }> = []
+  
+  // From current active messages
+  messages.filter((m) => m.bookmarked).forEach((m) => {
+    allBookmarks.push({ message: m, sessionTitle: conversationTitle || 'Current Chat', sessionId: '' })
+  })
+
+  // From stored sessions
+  sessions.forEach((s) => {
+    (s.messages || []).filter((m: any) => m.bookmarked).forEach((m: any) => {
+      if (!allBookmarks.some((b) => b.message.id === m.id)) {
+        allBookmarks.push({ message: m, sessionTitle: s.title || 'Saved Chat', sessionId: s.id })
+      }
+    })
+  })
 
   const isAIHome = location.pathname === '/app' || location.pathname.startsWith('/app/chat')
-  const title = isAIHome
-    ? (messages.length > 0 ? conversationTitle : 'AI Investigation Chat')
-    : (pageTitles[location.pathname] || 'ANVAYA')
+  const title = locale === 'kn'
+    ? (isAIHome ? (messages.length > 0 ? conversationTitle : 'ಎಐ ತನಿಖಾ ಚಾಟ್') : (pageTitlesKn[location.pathname] || 'ಅನ್ವಯ'))
+    : (isAIHome ? (messages.length > 0 ? conversationTitle : 'AI Investigation Chat') : (pageTitles[location.pathname] || 'ANVAYA'))
   const pageIcon = isAIHome ? 'chat' : (pageIcons[location.pathname] || 'article')
 
   const userInitial = (user?.username || 'O').charAt(0).toUpperCase()
@@ -84,6 +119,41 @@ export function TopBar() {
 
         {/* Right: actions */}
         <div className="flex shrink-0 items-center gap-2">
+          {/* Language Switcher (EN / ಕನ್ನಡ) */}
+          <button
+            onClick={() => setLocale(locale === 'en' ? 'kn' : 'en')}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all"
+            style={{
+              background: locale === 'kn' ? '#c8a84b' : 'rgba(255,255,255,0.1)',
+              color: locale === 'kn' ? '#003087' : '#ffffff',
+              border: '1px solid rgba(200,168,75,0.4)',
+            }}
+            title="Switch Language / ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸಿ"
+          >
+            <span className="material-icons-outlined" style={{ fontSize: 14 }}>translate</span>
+            <span>{locale === 'en' ? 'ಕನ್ನಡ' : 'English'}</span>
+          </button>
+
+          {/* Bookmarked items button */}
+          <button
+            onClick={() => setBookmarksModalOpen(true)}
+            className="relative flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              color: '#c8a84b',
+              border: '1px solid rgba(200,168,75,0.3)',
+            }}
+            title="View Bookmarked Messages"
+          >
+            <span className="material-icons-outlined" style={{ fontSize: 14 }}>bookmark</span>
+            <span className="hidden sm:inline">{locale === 'kn' ? 'ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳು' : 'Bookmarks'}</span>
+            {allBookmarks.length > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-slate-900">
+                {allBookmarks.length}
+              </span>
+            )}
+          </button>
+
           {/* Search button */}
           <button onClick={() => setCommandPaletteOpen(true)}
             className="hidden items-center gap-2 rounded-lg px-3 py-1.5 text-xs sm:flex transition-colors"
@@ -146,6 +216,74 @@ export function TopBar() {
         <span className="material-icons-outlined" style={{ fontSize: 12, color: '#2a4060' }}>chevron_right</span>
         <span className="text-[10px]" style={{ color: '#c8a84b' }}>{title}</span>
       </div>
+
+      {/* Bookmarks Modal */}
+      {bookmarksModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setBookmarksModalOpen(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-scale-in"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="material-icons-outlined text-amber-500" style={{ fontSize: 22 }}>bookmark</span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  {locale === 'kn' ? 'ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಿದ ಸಂದೇಶಗಳು' : 'Bookmarked Insights'}
+                </h3>
+              </div>
+              <button onClick={() => setBookmarksModalOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <span className="material-icons-outlined" style={{ fontSize: 18 }}>close</span>
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-96 overflow-y-auto space-y-3">
+              {allBookmarks.length === 0 ? (
+                <div className="py-8 text-center">
+                  <span className="material-icons-outlined text-3xl text-slate-300 dark:text-slate-600">bookmark_border</span>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    {locale === 'kn' ? 'ಯಾವುದೇ ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳಿಲ್ಲ' : 'No bookmarked messages yet'}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {locale === 'kn'
+                      ? 'ಸಂದೇಶದ ಮೇಲಿನ ಬುಕ್‌ಮಾರ್ಕ್ ಐಕಾನ್ ಕ್ಲಿಕ್ ಮಾಡಿ ಅವುಗಳನ್ನು ಇಲ್ಲಿ ಕಾಣಬಹುದು.'
+                      : 'Click the bookmark icon on any message in AI Chat to save it for quick reference.'}
+                  </p>
+                </div>
+              ) : (
+                allBookmarks.map(({ message, sessionTitle, sessionId }) => (
+                  <div key={message.id} className="rounded-xl border border-slate-200 p-3 bg-slate-50 dark:bg-slate-800/60 dark:border-slate-700">
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">📌 {sessionTitle}</span>
+                      <button onClick={() => toggleBookmark(message.id)}
+                        className="text-amber-500 hover:text-amber-600 font-medium flex items-center gap-0.5">
+                        <span className="material-icons-outlined" style={{ fontSize: 14 }}>bookmark_remove</span>
+                        {locale === 'kn' ? 'ತೆಗೆದುಹಾಕಿ' : 'Remove'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-800 dark:text-slate-200 line-clamp-3 leading-relaxed">
+                      {message.text}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-400">
+                        {message.timestamp ? new Date(message.timestamp).toLocaleString() : ''}
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (sessionId) restoreSession(sessionId)
+                          navigate('/app')
+                          setBookmarksModalOpen(false)
+                        }}
+                        className="text-xs font-semibold text-teal-600 hover:underline dark:text-teal-400 flex items-center gap-1">
+                        {locale === 'kn' ? 'ಚಾಟ್‌ಗೆ ಹೋಗಿ' : 'Open in Chat'} →
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

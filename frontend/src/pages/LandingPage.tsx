@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useLocale } from '../i18n/portal'
 
 // SVG fallback badges (shown if local images fail to load)
 const KSP_BADGE_SVG = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="%23003087" stroke="%23c8a84b" stroke-width="4"/><text x="50" y="44" text-anchor="middle" fill="%23c8a84b" font-family="Arial" font-size="11" font-weight="bold">ಕೆಎಸ್‌ಪಿ</text><text x="50" y="60" text-anchor="middle" fill="white" font-family="Arial" font-size="13" font-weight="bold">KSP</text><text x="50" y="74" text-anchor="middle" fill="%23c8a84b" font-family="Arial" font-size="8">KARNATAKA</text></svg>')}`
@@ -78,6 +79,8 @@ const features = [
 ]
 
 export function LandingPage() {
+  const { locale, setLocale } = useLocale()
+
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Inter', sans-serif", background: '#f0f4f8' }}>
 
@@ -104,6 +107,16 @@ export function LandingPage() {
           </a>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setLocale(locale === 'en' ? 'kn' : 'en')}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all"
+            style={{
+              background: '#c8a84b',
+              color: '#001f5c',
+            }}>
+            <span className="material-icons-outlined" style={{ fontSize: 13 }}>translate</span>
+            {locale === 'en' ? 'ಕನ್ನಡ' : 'English'}
+          </button>
           {socialLinks.map((s) => (
             <a key={s.label} href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined}
               rel="noopener" className="flex items-center gap-1 text-xs text-blue-400 hover:text-white transition-colors" title={s.label}>

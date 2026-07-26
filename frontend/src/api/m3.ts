@@ -70,6 +70,7 @@ export const m3Api={
  brief:(investigationId:string,caseId:string)=>call<any>(`/api/investigations/${investigationId}/cases/${caseId}/brief`),
  briefPdf:(investigationId:string,caseId:string)=>download(`/api/investigations/${investigationId}/cases/${caseId}/brief.pdf`,`anvaya-case-dossier-${caseId.toLowerCase()}.pdf`),
  conversationPdf:(investigationId:string,turns:Array<{role:string;text:string;kind:string;created_at:string}>)=>postDownload(`/api/investigations/${investigationId}/conversation.pdf`,{turns},`anvaya-conversation-${investigationId.toLowerCase()}.pdf`),
+ reportPdf:(reportId:string)=>download(`/api/reports/${reportId}/pdf`,`anvaya-report-${reportId.toLowerCase()}.pdf`),
  networkClusters:(investigationId:string,caseId:string)=>call<any>(`/api/investigations/${investigationId}/cases/${caseId}/network-clusters`),
  updateFirAssurance:(investigationId:string,caseId:string,findingId:string,payload:object)=>call<any>(`/api/investigations/${investigationId}/cases/${caseId}/assurance/${findingId}`,{method:'PATCH',body:JSON.stringify(payload)}),
  discover:(id:string,plan:object)=>call<any>(`/api/investigations/${id}/discover`,{method:'POST',body:JSON.stringify(plan)}),
